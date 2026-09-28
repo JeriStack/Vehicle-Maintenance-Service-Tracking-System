@@ -1,0 +1,103 @@
+/* assets/css/style.css */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden;
+    background-color: #f8f9fa;
+}
+
+/* Sidebar Wrapper */
+#wrapper {
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    margin-left: -250px;
+    transition: margin .25s ease-out;
+    background-color: #1e293b !important; /* Dark Navy */
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.1rem;
+    color: #f8f9fa;
+    background-color: #0f172a; /* Darker Navy */
+    border-bottom: 1px solid #334155 !important;
+}
+
+#sidebar-wrapper .list-group {
+    width: 250px;
+}
+
+#sidebar-wrapper .list-group-item {
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    color: #fff !important;
+    background-color: #334155 !important;
+    border-left: 4px solid #0dcaf0;
+    padding-left: 1.25rem;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    color: #fff !important;
+    background-color: #334155 !important;
+    border-left: 4px solid #0dcaf0;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+    display: flex;
+    flex-direction: column;
+}
+
+body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+    body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
+        margin-left: -250px;
+    }
+}
+
+/* Utilities */
+.tracking-wider {
+    letter-spacing: 0.05em;
+}
+
+.main-content {
+    flex: 1;
+}
+
+.card {
+    border-radius: 0.5rem;
+    border: 1px solid rgba(0,0,0,.125);
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+}
+
+.btn-primary {
+    background-color: #0ea5e9;
+    border-color: #0ea5e9;
+}
+
+.btn-primary:hover {
+    background-color: #0284c7;
+    border-color: #0284c7;
+}
