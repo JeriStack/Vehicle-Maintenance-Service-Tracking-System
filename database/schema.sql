@@ -95,6 +95,8 @@ CREATE TABLE IF NOT EXISTS notification_settings (
     service_due_reminder BOOLEAN DEFAULT TRUE,
     overdue_reminder BOOLEAN DEFAULT TRUE,
     reminder_days INT DEFAULT 7,
+    email_notifications BOOLEAN DEFAULT FALSE,
+    push_notifications BOOLEAN DEFAULT FALSE,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

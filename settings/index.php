@@ -9,7 +9,7 @@ try {
     $pdo = Database::getInstance();
     
     // 1. Get User Profile
-    $stmtU = $pdo->prepare("SELECT username, email, created_at FROM users WHERE id = ?");
+    $stmtU = $pdo->prepare("SELECT full_name, email, created_at FROM users WHERE id = ?");
     $stmtU->execute([$userId]);
     $user = $stmtU->fetch();
     
@@ -81,8 +81,8 @@ if (empty($_SESSION['csrf_token'])) {
                             <input type="hidden" name="action" value="update_profile">
                             
                             <div class="mb-3">
-                                <label class="form-label fw-medium">Username</label>
-                                <input type="text" class="form-control" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" required>
+                                <label class="form-label fw-medium">Full Name</label>
+                                <input type="text" class="form-control" name="full_name" value="<?php echo htmlspecialchars($user['full_name'] ?? ''); ?>" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-medium">Email Address</label>
@@ -126,7 +126,7 @@ if (empty($_SESSION['csrf_token'])) {
                             </div>
                             <div class="mb-4">
                                 <label class="form-label fw-medium">Preferred Service Provider</label>
-                                <input type="text" class="form-control" name="preferred_service_provider" value="<?php echo htmlspecialchars($prefs['preferred_service_provider']); ?>" placeholder="E.g. Bob's Auto Shop">
+                                <input type="text" class="form-control" name="preferred_service_provider" value="<?php echo htmlspecialchars($prefs['preferred_service_provider'] ?? ''); ?>" placeholder="E.g. Bob's Auto Shop">
                             </div>
                             
                             <button type="submit" class="btn btn-primary"><i class="bi bi-save me-1"></i> Save Preferences</button>

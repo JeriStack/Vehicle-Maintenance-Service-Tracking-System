@@ -4,10 +4,13 @@
 // Define Base URL dynamically
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
 $host = $_SERVER['HTTP_HOST'];
-$base_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
 
-// Ensure base_dir doesn't include specific PHP scripts like index.php
-$base_dir = preg_replace('/\/[^\/]+\.php$/', '', $base_dir);
+// Get the document root and the application root directory
+$doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+$app_dir = str_replace('\\', '/', dirname(__DIR__));
+
+// The base directory is the application directory minus the document root
+$base_dir = str_replace($doc_root, '', $app_dir);
 
 define('BASE_URL', $protocol . '://' . $host . $base_dir . '/');
 

@@ -23,10 +23,10 @@ try {
     $pdo = Database::getInstance();
     
     if ($action === 'update_profile') {
-        $username = trim(filter_input(INPUT_POST, 'username', FILTER_SANITIZE_STRING));
+        $fullName = trim(filter_input(INPUT_POST, 'full_name', FILTER_SANITIZE_STRING));
         $email = trim(filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL));
         
-        if (empty($username) || empty($email)) {
+        if (empty($fullName) || empty($email)) {
             $_SESSION['flash_error'] = "All fields are required.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $_SESSION['flash_error'] = "Invalid email format.";
@@ -37,9 +37,9 @@ try {
             if ($stmt->fetch()) {
                 $_SESSION['flash_error'] = "Email is already in use by another account.";
             } else {
-                $stmt = $pdo->prepare("UPDATE users SET username = ?, email = ? WHERE id = ?");
-                $stmt->execute([$username, $email, $userId]);
-                $_SESSION['username'] = $username;
+                $stmt = $pdo->prepare("UPDATE users SET full_name = ?, email = ? WHERE id = ?");
+                $stmt->execute([$fullName, $email, $userId]);
+                $_SESSION['user_name'] = $fullName;
                 $_SESSION['flash_success'] = "Profile updated successfully.";
             }
         }

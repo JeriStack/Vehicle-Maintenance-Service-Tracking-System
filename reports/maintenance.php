@@ -21,6 +21,10 @@ try {
     $stmt->execute([$userId]);
     $totals = $stmt->fetch();
     
+    // Ensure nulls from SUM() fallback to 0
+    $totals['completed_services'] = $totals['completed_services'] ?? 0;
+    $totals['total_cost'] = $totals['total_cost'] ?? 0;
+    
     // Upcoming
     $stmtUpcoming = $pdo->prepare("
         SELECT COUNT(*) FROM service_records sr
