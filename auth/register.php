@@ -23,14 +23,15 @@ if (empty($_SESSION['csrf_token'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <link href="<?php echo BASE_URL; ?>assets/css/style.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="auth-bg">
     <div class="container">
         <div class="row justify-content-center mt-5 mb-5">
             <div class="col-md-6">
-                <div class="card shadow-sm border-0 rounded-3">
+                <div class="card shadow-lg border-0 rounded-3 bg-white">
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
-                            <h4 class="fw-bold text-primary"><i class="bi bi-car-front-fill me-2"></i>Vehicle Maintenance</h4>
+                            <img src="<?php echo BASE_URL; ?>assets/images/logo.png" alt="VMS Tracker Logo" class="img-fluid mb-2" style="max-height: 80px;">
+                            <h4 class="fw-bold text-primary mb-1">VMS Tracker</h4>
                             <p class="text-muted">Create a new account</p>
                         </div>
                         

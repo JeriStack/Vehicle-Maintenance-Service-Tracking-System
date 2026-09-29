@@ -3,10 +3,13 @@
 ?>
 <!-- Sidebar -->
 <div class="sidebar border-end bg-dark text-white" id="sidebar-wrapper">
-    <div class="sidebar-heading border-bottom text-center py-3">
-        <div class="d-flex justify-content-between align-items-center px-2 sidebar-brand-row">
-            <div class="brand-content fw-bold text-uppercase tracking-wider d-flex align-items-center text-nowrap" style="font-size: 1.1rem;">
-                <i class="bi bi-car-front-fill me-2 text-info fs-4 brand-icon"></i>
+    <div class="sidebar-heading border-bottom text-center py-3 px-1">
+        <div class="d-flex justify-content-between align-items-center px-1 sidebar-brand-row">
+            <div class="brand-content fw-bold text-uppercase d-flex align-items-center text-nowrap" style="font-size: 0.8rem; margin-left: -10px;">
+                <!-- Logo image for collapsed state -->
+                <img src="<?php echo BASE_URL; ?>assets/images/logo.png" alt="Icon" class="collapse-only-icon img-fluid" style="display: none; max-height: 24px;">
+                <!-- Logo and text for expanded state -->
+                <img src="<?php echo BASE_URL; ?>assets/images/logo.png" alt="VMS Tracker Logo" class="sidebar-brand-text img-fluid" style="max-height: 28px; margin-right: -8px;">
                 <span class="sidebar-brand-text">VMS Tracker</span>
             </div>
             <button type="button" class="btn btn-sm text-white sidebar-toggle-btn d-none d-md-block flex-shrink-0" aria-label="Toggle sidebar" aria-expanded="true" title="Toggle Sidebar">

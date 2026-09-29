@@ -157,3 +157,24 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     background-color: #0284c7;
     border-color: #0284c7;
 }
+
+/* Authentication Pages Background */
+body.auth-bg {
+    background: url('../images/auth-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+    min-height: 100vh;
+}
+
+body.auth-bg::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0; left: 0;
+    background: rgba(15, 23, 42, 0.6); /* Navy tint overlay */
+    z-index: -1;
+}
+
+body.auth-bg .container {
+    position: relative;
+    z-index: 1;
+}
