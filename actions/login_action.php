@@ -25,23 +25,34 @@ if (empty($email) || empty($password)) {
 
 try {
     $pdo = Database::getInstance();
-    $stmt = $pdo->prepare("SELECT id, full_name, password FROM users WHERE email = ?");
+    $stmt = $pdo->prepare("SELECT id, full_name, password, role FROM users WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
 
     if ($user && password_verify($password, $user['password'])) {
+        if (isset($user['status']) && $user['status'] === 'inactive') {
+            $_SESSION['flash_error'] = "Your account has been deactivated. Please contact an administrator.";
+            header("Location: " . BASE_URL . "auth/login.php");
+            exit;
+        }
+
         // Prevent session fixation
         session_regenerate_id(true);
         
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['full_name'];
+        $_SESSION['role'] = $user['role'];
         $_SESSION['flash_success'] = "Welcome back, " . htmlspecialchars($user['full_name']) . "!";
         
         // Log the login
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action) VALUES (?, ?)");
         $logStmt->execute([$user['id'], 'User logged in']);
         
-        header("Location: " . BASE_URL . "dashboard/index.php");
+        if ($user['role'] === 'admin') {
+            header("Location: " . BASE_URL . "admin/dashboard.php");
+        } else {
+            header("Location: " . BASE_URL . "dashboard/index.php");
+        }
         exit;
     } else {
         $_SESSION['flash_error'] = "Invalid email or password.";

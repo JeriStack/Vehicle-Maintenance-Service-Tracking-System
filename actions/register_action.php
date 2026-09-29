@@ -62,7 +62,7 @@ try {
     
     $pdo->beginTransaction();
     
-    $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password, phone) VALUES (?, ?, ?, ?)");
+    $stmt = $pdo->prepare("INSERT INTO users (full_name, email, password, phone, role) VALUES (?, ?, ?, ?, 'user')");
     $stmt->execute([$fullName, $email, $hashedPassword, $phone]);
     $userId = $pdo->lastInsertId();
     

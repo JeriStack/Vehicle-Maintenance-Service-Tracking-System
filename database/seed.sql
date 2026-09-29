@@ -15,9 +15,9 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 -- Demo Users (Password is 'password123' for all)
 -- Password hashed using password_hash('password123', PASSWORD_DEFAULT)
-INSERT INTO users (id, full_name, email, password, phone) VALUES 
-(1, 'John Doe', 'john@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '1234567890'),
-(2, 'Jane Smith', 'jane@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '0987654321');
+INSERT INTO users (id, full_name, email, password, phone, role) VALUES 
+(1, 'Demo Vehicle Owner', 'demo@example.com', '$2y$12$j2rt18dxmqaBEyqgfHB2tevMQSnVcIWxsZ.3Fpo9mQ91usPioH6VW', '1234567890', 'user'),
+(2, 'System Administrator', 'admin@example.com', '$2y$12$j2rt18dxmqaBEyqgfHB2tevMQSnVcIWxsZ.3Fpo9mQ91usPioH6VW', '0987654321', 'admin');
 
 -- Notification Settings & Preferences
 INSERT INTO notification_settings (user_id) VALUES (1), (2);

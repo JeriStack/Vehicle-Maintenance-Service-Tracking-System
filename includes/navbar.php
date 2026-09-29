@@ -62,7 +62,10 @@
                         <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
                             <?php echo strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)); ?>
                         </div>
-                        <span class="d-none d-md-inline text-dark fw-medium"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
+                        <div class="d-none d-md-flex flex-column align-items-start lh-1">
+                            <span class="text-dark fw-medium"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
+                            <small class="text-muted" style="font-size: 0.75rem;"><?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'Administrator' : 'Vehicle Owner'; ?></small>
+                        </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="navbarDropdownUser">
                         <a class="dropdown-item py-2" href="<?php echo BASE_URL; ?>settings/profile.php"><i class="bi bi-person me-2 text-muted"></i> Profile</a>
