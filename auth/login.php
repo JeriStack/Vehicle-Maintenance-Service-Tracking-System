@@ -44,15 +44,25 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
             </div>
             
-            <div class="mb-4">
+            <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
             </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" name="remember_me" id="remember_me" value="1">
+                    <label class="form-check-label small user-select-none" for="remember_me">
+                        Remember me
+                    </label>
+                </div>
+                <a href="<?php echo BASE_URL; ?>auth/forgot_password.php" class="text-decoration-none small">Forgot password?</a>
+            </div>
             
-            <div class="d-grid mt-4 mb-4">
+            <div class="d-grid mb-4">
                 <button type="submit" class="auth-btn text-white">Login</button>
             </div>
         </form>

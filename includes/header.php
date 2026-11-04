@@ -42,6 +42,20 @@ if (isset($_SESSION['user_id'])) {
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Real-time WebSocket & App Configuration -->
+    <script>
+        window.VMS_CONFIG = {
+            baseUrl: <?php echo json_encode(BASE_URL); ?>,
+            userId: <?php echo isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 'null'; ?>,
+            userName: <?php echo json_encode($_SESSION['user_name'] ?? ''); ?>,
+            userRole: <?php echo json_encode($_SESSION['role'] ?? 'guest'); ?>,
+            csrfToken: <?php echo json_encode($_SESSION['csrf_token'] ?? ''); ?>,
+            wsHost: <?php echo json_encode(defined('WS_CLIENT_HOST') ? WS_CLIENT_HOST : 'localhost'); ?>,
+            wsPort: <?php echo defined('WS_CLIENT_PORT') ? (int)WS_CLIENT_PORT : 8080; ?>,
+            wsFallbackPoll: <?php echo defined('WS_FALLBACK_POLL_MS') ? (int)WS_FALLBACK_POLL_MS : 15000; ?>
+        };
+    </script>
 </head>
 <body class="bg-light">
     <!-- Wrapper -->

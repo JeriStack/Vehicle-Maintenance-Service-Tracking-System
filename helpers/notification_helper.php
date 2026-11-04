@@ -1,6 +1,7 @@
 <?php
 // helpers/notification_helper.php
 require_once __DIR__ . '/../config/app.php';
+require_once __DIR__ . '/websocket_helper.php';
 
 class NotificationHelper {
     
@@ -115,6 +116,13 @@ class NotificationHelper {
         if (!$checkStmt->fetch()) {
             $insStmt = $pdo->prepare("INSERT INTO notifications (user_id, vehicle_id, type, title, message) VALUES (?, ?, ?, ?, ?)");
             $insStmt->execute([$userId, $vehicleId, $type, $title, $message]);
+            $notificationId = $pdo->lastInsertId();
+
+            // Push real-time alert via WebSocket
+            WebSocketHelper::notifyUser($userId, $title, $message, $type, [
+                'id'         => $notificationId,
+                'vehicle_id' => $vehicleId
+            ]);
         }
     }
 }

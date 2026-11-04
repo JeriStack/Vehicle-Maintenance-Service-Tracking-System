@@ -1,0 +1,21 @@
+{
+    "name": "vms/vehicle-maintenance-tracking-system",
+    "description": "Vehicle Maintenance Service Tracking System",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5 || ^10.0 || ^11.0"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "php tests/run_tests.php"
+    }
+}
+

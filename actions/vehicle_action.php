@@ -2,6 +2,7 @@
 // actions/vehicle_action.php
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../helpers/websocket_helper.php';
 
 // Protect action route
 requireLogin();
@@ -62,6 +63,14 @@ try {
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)");
         $logStmt->execute([$userId, 'Added vehicle', 'vehicles', $vehicleId]);
         
+        WebSocketHelper::vehicleUpdated($userId, [
+            'id'           => $vehicleId,
+            'plate_number' => $plateNumber,
+            'make'         => $make,
+            'model'        => $model,
+            'action'       => 'create'
+        ]);
+
         $_SESSION['flash_success'] = "Vehicle added successfully!";
         header("Location: " . BASE_URL . "vehicles/index.php");
         exit;
@@ -112,6 +121,12 @@ try {
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)");
         $logStmt->execute([$userId, 'Updated vehicle', 'vehicles', $vehicleId]);
         
+        WebSocketHelper::vehicleUpdated($userId, [
+            'id'           => $vehicleId,
+            'plate_number' => $plateNumber,
+            'action'       => 'update'
+        ]);
+
         $_SESSION['flash_success'] = "Vehicle updated successfully!";
         header("Location: " . BASE_URL . "vehicles/index.php");
         exit;
@@ -135,6 +150,11 @@ try {
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)");
         $logStmt->execute([$userId, 'Deleted vehicle', 'vehicles', $vehicleId]);
         
+        WebSocketHelper::vehicleUpdated($userId, [
+            'id'     => $vehicleId,
+            'action' => 'delete'
+        ]);
+
         $_SESSION['flash_success'] = "Vehicle deleted successfully!";
         header("Location: " . BASE_URL . "vehicles/index.php");
         exit;

@@ -2,6 +2,7 @@
 // actions/service_action.php
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../helpers/websocket_helper.php';
 
 // Protect action route
 requireLogin();
@@ -88,6 +89,13 @@ try {
         
         $pdo->commit();
         
+        WebSocketHelper::serviceUpdated($userId, [
+            'id'           => $serviceId,
+            'vehicle_id'   => $vehicleId,
+            'service_type' => $serviceType,
+            'action'       => 'create'
+        ]);
+
         $_SESSION['flash_success'] = "Service record added successfully!";
         header("Location: " . BASE_URL . "services/index.php");
         exit;
@@ -146,6 +154,13 @@ try {
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)");
         $logStmt->execute([$userId, 'Updated service record', 'service_records', $serviceId]);
         
+        WebSocketHelper::serviceUpdated($userId, [
+            'id'           => $serviceId,
+            'vehicle_id'   => $vehicleId,
+            'service_type' => $serviceType,
+            'action'       => 'update'
+        ]);
+
         $_SESSION['flash_success'] = "Service record updated successfully!";
         header("Location: " . BASE_URL . "services/index.php");
         exit;
@@ -173,6 +188,11 @@ try {
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, table_name, record_id) VALUES (?, ?, ?, ?)");
         $logStmt->execute([$userId, 'Deleted service record', 'service_records', $serviceId]);
         
+        WebSocketHelper::serviceUpdated($userId, [
+            'id'     => $serviceId,
+            'action' => 'delete'
+        ]);
+
         $_SESSION['flash_success'] = "Service record deleted successfully!";
         header("Location: " . BASE_URL . "services/index.php");
         exit;

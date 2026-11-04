@@ -23,5 +23,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="<?php echo BASE_URL; ?>assets/js/app.js"></script>
+    <!-- Real-time WebSocket Client -->
+    <script src="<?php echo BASE_URL; ?>assets/js/notifications.js"></script>
+
+    <!-- Real-time Floating Toast Container -->
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div id="vms-toast-container" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;"></div>
+    </div>
 </body>
 </html>

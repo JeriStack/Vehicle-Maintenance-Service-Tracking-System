@@ -44,6 +44,36 @@ try {
         $_SESSION['role'] = $user['role'];
         $_SESSION['flash_success'] = "Welcome back, " . htmlspecialchars($user['full_name']) . "!";
         
+        // Remember Me Persistent Token
+        if (!empty($_POST['remember_me'])) {
+            try {
+                $selector = bin2hex(random_bytes(16));
+                $validator = bin2hex(random_bytes(32));
+                $hashedValidator = hash('sha256', $validator);
+                $expiresAt = date('Y-m-d H:i:s', time() + (86400 * 30)); // 30 days
+
+                // Remove expired tokens for this user
+                $cleanupStmt = $pdo->prepare("DELETE FROM remember_tokens WHERE user_id = ? AND expires_at < NOW()");
+                $cleanupStmt->execute([$user['id']]);
+
+                $remStmt = $pdo->prepare("INSERT INTO remember_tokens (user_id, selector, hashed_validator, expires_at) VALUES (?, ?, ?, ?)");
+                $remStmt->execute([$user['id'], $selector, $hashedValidator, $expiresAt]);
+
+                $cookieParams = [
+                    'expires'  => time() + (86400 * 30),
+                    'path'     => '/',
+                    'httponly' => true,
+                    'samesite' => 'Lax'
+                ];
+                if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+                    $cookieParams['secure'] = true;
+                }
+                setcookie('vms_remember', $selector . ':' . $validator, $cookieParams);
+            } catch (\Throwable $e) {
+                error_log("Failed setting remember token: " . $e->getMessage(), 3, __DIR__ . '/../logs/app.log');
+            }
+        }
+
         // Log the login
         $logStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action) VALUES (?, ?)");
         $logStmt->execute([$user['id'], 'User logged in']);

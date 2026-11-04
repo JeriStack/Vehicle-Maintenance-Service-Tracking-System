@@ -2,6 +2,7 @@
 // notifications/mark_read.php
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../helpers/websocket_helper.php';
 
 requireLogin();
 
@@ -20,9 +21,11 @@ try {
         $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
         $stmt->execute([$userId]);
         $_SESSION['flash_success'] = "All notifications marked as read.";
+        WebSocketHelper::notificationRead($userId, 'all');
     } elseif (is_numeric($id)) {
         $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $userId]);
+        WebSocketHelper::notificationRead($userId, (int)$id);
     }
     
 } catch (PDOException $e) {

@@ -18,14 +18,16 @@
                 <li class="nav-item dropdown me-3">
                     <a class="nav-link text-dark position-relative" href="#" id="navbarDropdownNotif" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="bi bi-bell fs-5"></i>
-                        <?php if (isset($unreadCount) && $unreadCount > 0): ?>
-                            <span class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                <span class="visually-hidden">New alerts</span>
-                            </span>
-                        <?php endif; ?>
+                        <span id="notifBadge" class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle <?php echo (isset($unreadCount) && $unreadCount > 0) ? '' : 'd-none'; ?>">
+                            <span class="visually-hidden">New alerts</span>
+                        </span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdownNotif" style="width: 300px;">
-                        <h6 class="dropdown-header border-bottom py-2">Notifications</h6>
+                    <div class="dropdown-menu dropdown-menu-end shadow border-0" id="navbarNotifDropdown" aria-labelledby="navbarDropdownNotif" style="width: 320px;">
+                        <div class="dropdown-header d-flex justify-content-between align-items-center border-bottom py-2">
+                            <span class="fw-bold text-dark">Notifications</span>
+                            <span id="notifBadgeCount" class="badge bg-primary rounded-pill"><?php echo (int)($unreadCount ?? 0); ?> unread</span>
+                        </div>
+                        <div id="navbarNotifList">
                         <?php
                         // Fetch 3 most recent notifications if DB is available
                         $notifs = [];
@@ -39,20 +41,21 @@
                             foreach ($notifs as $n):
                                 $bg = $n['is_read'] ? '' : 'bg-light';
                         ?>
-                            <a class="dropdown-item py-2 border-bottom <?php echo $bg; ?>" href="<?php echo BASE_URL; ?>notifications/index.php">
+                            <a class="dropdown-item py-2 border-bottom notif-dropdown-item <?php echo $bg; ?>" data-notif-id="<?php echo $n['id']; ?>" href="<?php echo BASE_URL; ?>notifications/index.php">
                                 <div class="d-flex w-100 justify-content-between">
                                     <small class="fw-bold text-primary"><?php echo htmlspecialchars($n['title']); ?></small>
                                     <small class="text-muted" style="font-size: 0.7rem;"><?php echo date('M d', strtotime($n['created_at'])); ?></small>
                                 </div>
-                                <small class="text-wrap text-muted"><?php echo htmlspecialchars(substr($n['message'], 0, 50)) . '...'; ?></small>
+                                <small class="text-wrap text-muted d-block"><?php echo htmlspecialchars(substr($n['message'], 0, 50)) . '...'; ?></small>
                             </a>
                         <?php 
                             endforeach;
                         else:
                         ?>
-                            <div class="dropdown-item text-muted text-center py-3">No new notifications</div>
+                            <div id="notifEmptyPlaceholder" class="dropdown-item text-muted text-center py-3">No new notifications</div>
                         <?php endif; ?>
-                        <a class="dropdown-item text-center fw-bold text-primary py-2" href="<?php echo BASE_URL; ?>notifications/index.php">View All</a>
+                        </div>
+                        <a class="dropdown-item text-center fw-bold text-primary py-2 bg-white" href="<?php echo BASE_URL; ?>notifications/index.php">View All Notifications</a>
                     </div>
                 </li>
                 

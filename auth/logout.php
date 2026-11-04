@@ -4,6 +4,19 @@ require_once __DIR__ . '/../config/app.php';
 
 $userId = $_SESSION['user_id'] ?? null;
 
+// Clear remember me cookie and database token
+if (isset($_COOKIE['vms_remember'])) {
+    $parts = explode(':', $_COOKIE['vms_remember']);
+    if (count($parts) === 2) {
+        try {
+            $pdo = Database::getInstance();
+            $del = $pdo->prepare("DELETE FROM remember_tokens WHERE selector = ?");
+            $del->execute([$parts[0]]);
+        } catch (\Throwable $e) {}
+    }
+    setcookie('vms_remember', '', time() - 3600, '/');
+}
+
 if ($userId) {
     try {
         $pdo = Database::getInstance();

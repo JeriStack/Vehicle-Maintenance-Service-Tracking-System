@@ -3,16 +3,18 @@
 
 // Define Base URL dynamically
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
 // Get the document root and the application root directory
-$doc_root = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+$doc_root = isset($_SERVER['DOCUMENT_ROOT']) ? str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']) : '';
 $app_dir = str_replace('\\', '/', dirname(__DIR__));
 
 // The base directory is the application directory minus the document root
-$base_dir = str_replace($doc_root, '', $app_dir);
+$base_dir = $doc_root ? str_replace($doc_root, '', $app_dir) : '/Vehicle-Maintenance-Service-Tracking-System';
 
-define('BASE_URL', $protocol . '://' . $host . $base_dir . '/');
+if (!defined('BASE_URL')) {
+    define('BASE_URL', $protocol . '://' . $host . $base_dir . '/');
+}
 
 // Application Constants
 define('APP_NAME', 'Vehicle Maintenance Service Tracking System');
