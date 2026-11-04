@@ -1,0 +1,164 @@
+@startuml erd
+skinparam linetype ortho
+skinparam shadowing false
+skinparam monochrome false
+
+title Vehicle Maintenance Service Tracking System (VMS) - Entity-Relationship Diagram (ERD)
+
+entity "users" as users {
+  *id : INT <<PK, AI>>
+  --
+  *full_name : VARCHAR(255)
+  *email : VARCHAR(255) <<UNIQUE>>
+  *password : VARCHAR(255)
+  phone : VARCHAR(50)
+  *role : ENUM('user','admin') = 'user'
+  *status : ENUM('active','inactive') = 'active'
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "vehicles" as vehicles {
+  *id : INT <<PK, AI>>
+  --
+  *user_id : INT <<FK>>
+  *plate_number : VARCHAR(50)
+  normalized_plate : VARCHAR(50)
+  *vehicle_type : VARCHAR(100)
+  *make : VARCHAR(100)
+  *model : VARCHAR(100)
+  *year : INT
+  color : VARCHAR(50)
+  vin_number : VARCHAR(100)
+  *current_mileage : INT = 0
+  registration_date : DATE
+  *registration_expiry : DATE
+  *status : VARCHAR(50) = 'Active'
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "maintenance_types" as maintenance_types {
+  *id : INT <<PK, AI>>
+  --
+  *name : VARCHAR(100)
+  *slug : VARCHAR(100) <<UNIQUE>>
+  description : TEXT
+  default_days_interval : INT
+  default_km_interval : INT
+  *is_active : BOOLEAN = TRUE
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "service_records" as service_records {
+  *id : INT <<PK, AI>>
+  --
+  *vehicle_id : INT <<FK>>
+  maintenance_type_id : INT <<FK, NULL>>
+  *service_type : VARCHAR(100)
+  *service_date : DATE
+  *mileage : INT
+  description : TEXT
+  parts_replaced : TEXT
+  service_provider : VARCHAR(255)
+  *cost : DECIMAL(10,2) = 0.00
+  next_service_date : DATE
+  next_service_mileage : INT
+  *status : VARCHAR(50) = 'Completed'
+  void_reason : VARCHAR(255)
+  remarks : TEXT
+  created_at : TIMESTAMP
+  updated_at : TIMESTAMP
+}
+
+entity "maintenance_schedules" as maintenance_schedules {
+  *id : INT <<PK, AI>>
+  --
+  *vehicle_id : INT <<FK>>
+  maintenance_type_id : INT <<FK, NULL>>
+  source_service_id : INT <<FK, NULL>>
+  next_service_date : DATE
+  next_service_mileage : INT
+  *status : VARCHAR(50) = 'ACTIVE'
+  created_at : TIMESTAMP
+  completed_at : TIMESTAMP
+}
+
+entity "vehicle_mileage_logs" as vehicle_mileage_logs {
+  *id : INT <<PK, AI>>
+  --
+  *vehicle_id : INT <<FK>>
+  *recorded_mileage : INT
+  *source : VARCHAR(50) = 'MANUAL'
+  created_at : TIMESTAMP
+}
+
+entity "notifications" as notifications {
+  *id : INT <<PK, AI>>
+  --
+  *user_id : INT <<FK>>
+  vehicle_id : INT <<FK, NULL>>
+  schedule_id : INT <<FK, NULL>>
+  *type : VARCHAR(50)
+  *title : VARCHAR(255)
+  *message : TEXT
+  dedupe_key : VARCHAR(64)
+  *is_read : BOOLEAN = FALSE
+  created_at : TIMESTAMP
+}
+
+entity "notification_settings" as notification_settings {
+  *id : INT <<PK, AI>>
+  --
+  *user_id : INT <<FK, UNIQUE>>
+  maintenance_reminder : BOOLEAN = TRUE
+  registration_reminder : BOOLEAN = TRUE
+  service_due_reminder : BOOLEAN = TRUE
+  overdue_reminder : BOOLEAN = TRUE
+  reminder_days : INT = 7
+  email_notifications : BOOLEAN = FALSE
+  push_notifications : BOOLEAN = FALSE
+  updated_at : TIMESTAMP
+}
+
+entity "vehicle_preferences" as vehicle_preferences {
+  *id : INT <<PK, AI>>
+  --
+  *user_id : INT <<FK, UNIQUE>>
+  default_service_interval : INT = 6
+  default_mileage_interval : INT = 5000
+  preferred_service_provider : VARCHAR(255)
+  updated_at : TIMESTAMP
+}
+
+entity "audit_logs" as audit_logs {
+  *id : INT <<PK, AI>>
+  --
+  user_id : INT <<FK, NULL>>
+  actor_type : VARCHAR(50) = 'USER'
+  *action : VARCHAR(255)
+  table_name : VARCHAR(100)
+  record_id : INT
+  created_at : TIMESTAMP
+}
+
+' Entity Relationships
+users ||--o{ vehicles : "owns"
+users ||--|| notification_settings : "configures"
+users ||--|| vehicle_preferences : "specifies"
+users ||--o{ notifications : "receives"
+users ||--o{ audit_logs : "records"
+
+vehicles ||--o{ service_records : "logs"
+vehicles ||--o{ maintenance_schedules : "schedules"
+vehicles ||--o{ vehicle_mileage_logs : "tracks"
+vehicles ||--o{ notifications : "generates context"
+
+maintenance_types ||--o{ service_records : "categorizes"
+maintenance_types ||--o{ maintenance_schedules : "templates"
+
+service_records ||--o| maintenance_schedules : "triggers next"
+
+@enduml
+

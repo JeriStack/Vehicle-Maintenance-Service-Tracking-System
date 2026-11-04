@@ -1,0 +1,69 @@
+@startuml sequence-service-recording
+autonumber
+skinparam shadowing false
+skinparam monochrome false
+
+title Service Recording & Monotonic Odometer Advancement Sequence
+
+actor "Vehicle Owner" as Owner
+participant "Browser" as Browser
+participant "services/create.php" as ServiceView
+participant "actions/service_action.php" as ServiceAction
+participant "includes/auth.php" as AuthGuard
+participant "Database (PDO)" as DB
+participant "helpers/websocket_helper.php" as WSHelper
+participant "WebSocket Daemon" as WS
+
+Owner -> Browser: Navigate to /services/create.php
+Browser -> ServiceView: HTTP GET
+ServiceView -> AuthGuard: requireUser()
+AuthGuard --> ServiceView: Authorized
+
+ServiceView -> DB: SELECT * FROM vehicles WHERE user_id = ? AND status = 'Active'
+DB --> ServiceView: Owned Vehicles List
+ServiceView --> Browser: Render Service Form (Type, Date, Mileage, Cost, Provider, Next Targets)
+
+Owner -> Browser: Fill form & submit
+Browser -> ServiceAction: HTTP POST (vehicle_id, service_type, service_date, mileage, cost, next_date, next_mileage, csrf)
+
+ServiceAction -> AuthGuard: Validate session & CSRF token
+ServiceAction -> DB: Verify Vehicle Ownership (SELECT id, current_mileage FROM vehicles WHERE id = ? AND user_id = ?)
+DB --> ServiceAction: Vehicle Record
+
+alt Ownership Invalid OR Vehicle Not Found
+  ServiceAction --> Browser: HTTP 403 / Redirect "Permission denied"
+end
+
+alt Service Date > CURRENT_DATE
+  ServiceAction --> Browser: Redirect with error: "Completed date cannot be in the future"
+end
+
+ServiceAction -> DB: Begin Transaction
+
+ServiceAction -> DB: INSERT INTO service_records (vehicle_id, service_type, service_date, mileage, cost, provider, parts, status)
+DB --> ServiceAction: service_id
+
+alt Submitted Mileage > Vehicle Current Mileage
+  ServiceAction -> DB: UPDATE vehicles SET current_mileage = ? WHERE id = ?
+  ServiceAction -> DB: INSERT INTO vehicle_mileage_logs (vehicle_id, recorded_mileage, source)
+end
+
+opt Next Service Date OR Next Mileage Provided
+  ServiceAction -> DB: INSERT/UPDATE maintenance_schedules (vehicle_id, next_date, next_mileage, status = 'ACTIVE')
+end
+
+ServiceAction -> DB: INSERT INTO audit_logs (user_id, action = 'Added service record', table = 'service_records')
+ServiceAction -> DB: Commit Transaction
+
+ServiceAction -> WSHelper: serviceUpdated(user_id, service_id)
+WSHelper -> DB: INSERT INTO realtime_events (user_id, event, payload)
+opt Non-blocking TCP Loopback Available
+  WSHelper -> WS: Socket write JSON payload (port 8080)
+  WS --> Browser: WebSocket Push: "service_created" Toast & Audio Chime
+end
+
+ServiceAction --> Browser: HTTP 302 Redirect to /services/index.php (Flash Success)
+Browser --> Owner: Render updated Service History table
+
+@enduml
+

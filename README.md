@@ -20,6 +20,13 @@ A full-stack, production-ready PHP application to track, manage, and report vehi
 - **Frontend:** HTML5, CSS3, Vanilla JS, Bootstrap 5, Chart.js
 - **Real-Time:** Native RFC 6455 WebSocket Server (PHP socket stream daemon) with fallback polling
 
+## Project Governance & Documentation
+
+Formal engineering deliverables and project management baselines are located in [`docs/project/`](docs/project/):
+- **Phase 0 — Project Initiation & Feasibility:** [Project Charter](docs/project/project-charter.md), [Scope Statement](docs/project/scope-statement.md), [Environment Baseline](docs/project/environment-baseline.md), [Phase 0 Assessment](docs/project/phase-0-assessment.md).
+- **Phase 1 — Requirements & Backlog:** [Requirements Baseline](docs/project/requirements/requirements-baseline.md), [Product Backlog](docs/project/backlog/product-backlog.md), [Traceability Matrix](docs/project/requirements/traceability-matrix.md), [Phase 1 Assessment](docs/project/phase-1-assessment.md).
+- **Phase 2 — Process Analysis & Design:** [Process Analysis](docs/project/design/process-analysis.md), [Architecture Decisions (ADRs)](docs/project/design/architecture-decision-records.md), [Data Dictionary](docs/project/design/database/data-dictionary.md), [Route Map](docs/project/design/routing/route-map.md), [Threat Model](docs/project/design/security/threat-model.md), [Phase 2 Assessment](docs/project/phase-2-assessment.md).
+
 ## Installation
 
 1. Clone or download the repository to your XAMPP `htdocs` directory.

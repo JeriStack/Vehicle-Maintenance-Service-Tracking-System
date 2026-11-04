@@ -1,0 +1,70 @@
+@startuml activity-overall
+skinparam shadowing false
+skinparam monochrome false
+
+title Overall Application Authentication & Role Routing Activity
+
+start
+
+:User visits VMS Portal;
+
+if (Has Active Session?) then (yes)
+  :Validate Session Token;
+else (no)
+  if (Has Remember-Me Cookie?) then (yes)
+    :Extract Selector & Validator;
+    :Query remember_tokens Table;
+    if (Token Valid & Not Expired?) then (yes)
+      :Regenerate Session ID;
+      :Rotate Validator in DB & Cookie;
+      :Restore User Session;
+    else (no)
+      :Clear Remember Cookie;
+      :Display Login Page (/auth/login.php);
+      stop
+    endif
+  else (no)
+    :Display Login Page (/auth/login.php);
+    if (Action is Register?) then (yes)
+      :Display Registration Form;
+      :Submit User Details;
+      :Normalize Email & Hash Password (bcrypt);
+      :Assign role = 'user';
+      :Save User to Database;
+      :Display Success & Redirect to Login;
+    endif
+    
+    :Submit Login Credentials;
+    :Lookup User by Normalized Email;
+    
+    if (User Exists & Password Matches?) then (yes)
+      if (User Status == 'active'?) then (yes)
+        :Regenerate Session ID (session_regenerate_id);
+        :Set $_SESSION['user_id'] & Role;
+        if (Remember Me Checked?) then (yes)
+          :Issue Split-Token Cookie (30 days);
+        endif
+      else (no)
+        :Display "Account Deactivated" Error;
+        stop
+      endif
+    else (no)
+      :Display Generic "Invalid Credentials" Error;
+      stop
+    endif
+  endif
+endif
+
+' Role Routing
+if ($_SESSION['role'] == 'admin') then (yes)
+  :Route to Administrator Dashboard (/admin/dashboard.php);
+  :Enforce requireAdmin() Guard;
+else (user)
+  :Route to Vehicle Owner Dashboard (/dashboard/index.php);
+  :Enforce requireUser() Guard;
+  :Establish WebSocket Connection (ws://localhost:8080);
+endif
+
+stop
+@enduml
+
