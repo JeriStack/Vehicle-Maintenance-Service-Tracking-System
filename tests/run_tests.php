@@ -15,11 +15,25 @@ ini_set('display_errors', '1');
 
 $startTime = microtime(true);
 
-require_once __DIR__ . '/TestCase.php';
+require_once __DIR__ . '/bootstrap.php';
 
-// Discovered tests
-$testDir = __DIR__ . '/Unit';
-$testFiles = glob($testDir . '/*Test.php');
+// Discovered test suites
+$isSmokeOnly = in_array('--smoke', $argv, true);
+$isUnitOnly = in_array('--unit', $argv, true);
+
+$testFiles = [];
+if ($isSmokeOnly) {
+    $testFiles = glob(__DIR__ . '/Smoke/*Test.php') ?: [];
+    $suiteLabel = "Smoke Test Suite";
+} elseif ($isUnitOnly) {
+    $testFiles = glob(__DIR__ . '/Unit/*Test.php') ?: [];
+    $suiteLabel = "Unit Test Suite";
+} else {
+    $unitFiles = glob(__DIR__ . '/Unit/*Test.php') ?: [];
+    $smokeFiles = glob(__DIR__ . '/Smoke/*Test.php') ?: [];
+    $testFiles = array_merge($unitFiles, $smokeFiles);
+    $suiteLabel = "Automated Test Suite (Unit & Smoke)";
+}
 
 $totalTests = 0;
 $totalAssertions = 0;
@@ -29,17 +43,24 @@ $failures = [];
 
 echo PHP_EOL;
 echo "====================================================================" . PHP_EOL;
-echo " Vehicle Maintenance Service Tracking System - Unit Test Suite" . PHP_EOL;
+echo " Vehicle Maintenance Service Tracking System - {$suiteLabel}" . PHP_EOL;
 echo " PHP Version: " . PHP_VERSION . " (" . PHP_OS . ")" . PHP_EOL;
-echo " Test Directory: " . $testDir . PHP_EOL;
+echo " Target Files: " . count($testFiles) . " test files discovered" . PHP_EOL;
 echo "====================================================================" . PHP_EOL . PHP_EOL;
 
 foreach ($testFiles as $file) {
     require_once $file;
 
-    $className = 'Tests\\Unit\\' . basename($file, '.php');
+    $baseName = basename($file, '.php');
+    $subDir = basename(dirname($file));
+    $className = "Tests\\{$subDir}\\{$baseName}";
+
     if (!class_exists($className)) {
-        continue;
+        // Fallback check
+        $className = "Tests\\Unit\\{$baseName}";
+        if (!class_exists($className)) {
+            continue;
+        }
     }
 
     $reflection = new ReflectionClass($className);

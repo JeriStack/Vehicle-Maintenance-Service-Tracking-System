@@ -132,7 +132,28 @@ This directory contains the formal deliverables, technical specifications, requi
 
 ---
 
-## 5. Core Architectural Principles
+## 5. Phase 4 — Repository and Application Foundation (Sprint 1)
+
+### Technical Foundation & Core Infrastructure (`app/`, `bin/`, `public/`, `storage/`)
+
+| Deliverable | Description | Status |
+|---|---|---|
+| [**Public Web Document Root**](../../public/) | Dedicated `public/` web root containing `index.php`, `.htaccess`, and `assets/`, isolating code and data from web exposure | Complete |
+| [**Composer PSR-4 Autoloading**](../../composer.json) | Clean namespace separation with `"VMS\\": "app/"`, `"Database\\Seeders\\": "database/seeders/"`, and helper auto-inclusion | Complete |
+| [**Centralized Configuration & Env**](../../app/Core/Config.php) | Secure `.env` environment loading and type-safe centralized `Config::get()` access without hardcoded secrets | Complete |
+| [**Hardened PDO Database Manager**](../../app/Core/Database.php) | Centralized PDO singleton with UTF-8 (`utf8mb4`), exception mode, and connection failure logging | Complete |
+| [**Front Controller & Router**](../../app/Core/Router.php) | Native RESTful router supporting dynamic parameters (`/vehicles/{id}`), middleware execution, 404, and 405 handlers | Complete |
+| [**Secure Session & Flash Engine**](../../app/Core/Session.php) | Hardened session bootstrap with strict mode, HTTP-only cookie protection, Lax SameSite, and atomic flash messaging | Complete |
+| [**Cryptographic CSRF Protection**](../../app/Core/Csrf.php) | 64-character CSPRNG CSRF token generator, hidden input helper, and timing-attack-safe validation via `hash_equals()` | Complete |
+| [**Application Centralized Error Handler**](../../app/Core/App.php) | Centralized PHP error and exception trap preventing sensitive stack traces from leaking to clients | Complete |
+| [**CLI Migration & Seeder Console**](../../bin/console) | Console utility (`bin/console`) supporting `migrate`, `migrate:status`, `seed`, `health`, and `help` | Complete |
+| [**System Health Monitoring Endpoints**](../../app/Controllers/HealthController.php) | Public, non-sensitive liveness probe (`GET /health`) and database readiness probe (`GET /health/ready`) | Complete |
+| [**Automated Smoke Test Suite**](../../tests/Smoke/SmokeTest.php) | 12 automated smoke tests verifying bootstrap, routing, CSRF, sessions, migrations, and health endpoints | Complete |
+| [**Phase 4 Assessment Report**](phase-4-assessment.md) | Comprehensive Phase 4 and Sprint 1 foundation execution report and completion assessment | Complete |
+
+---
+
+## 6. Core Architectural Principles
 
 1. **Two-Role Model:** Exactly two system roles exist: `SYSTEM_ADMIN` and `VEHICLE_OWNER`. Mechanics and service centers are descriptive metadata attributes on service transactions, **not** authenticated user roles.
 2. **Strict Data Boundary:** Administrators oversee user accounts, global catalog maintenance types, audit logs, and system health. Administrators **do not** view private owner service histories without explicit user consent.
