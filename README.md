@@ -36,9 +36,9 @@ Vehicle-Maintenance-Service-Tracking-System/
 ├── bin/                      # CLI tools and console runner (bin/console)
 ├── config/                   # Configuration presets (database, constants, websocket, mail)
 ├── database/                 # Database schema, migrations, and seeders
-│   ├── migrations/           # SQL schema migrations
-│   ├── seeders/              # Database reference data seeders
-│   └── schema.sql            # Base relational schema
+│   ├── migrations/           # Versioned SQL schema migrations (20261105000001–13)
+│   ├── seeders/              # Database reference data seeders (MaintenanceTypeSeeder)
+│   └── schema.sql            # Clean relational schema snapshot
 ├── public/                   # Dedicated public web document root
 │   ├── assets/               # Public static assets (CSS, JS, icons)
 │   ├── .htaccess             # Apache rewrite rules and security headers
@@ -51,6 +51,7 @@ Vehicle-Maintenance-Service-Tracking-System/
 ├── tests/                    # Automated testing suite
 │   ├── Smoke/                # End-to-end foundation smoke tests (SmokeTest.php)
 │   ├── Unit/                 # Comprehensive business logic unit tests
+│   ├── Integration/          # Dedicated database integration tests (DatabaseIntegrationTest.php)
 │   └── run_tests.php         # Zero-dependency native CLI test runner
 └── docs/                     # Engineering, architecture, and governance documentation
 ```
@@ -63,6 +64,7 @@ Formal engineering deliverables and project management baselines are located in 
 - **Phase 2 — Process Analysis & Design:** [Process Analysis](docs/project/design/process-analysis.md), [Architecture Decisions (ADRs)](docs/project/design/architecture-decision-records.md), [Data Dictionary](docs/project/design/database/data-dictionary.md), [Route Map](docs/project/design/routing/route-map.md), [Threat Model](docs/project/design/security/threat-model.md), [Phase 2 Assessment](docs/project/phase-2-assessment.md).
 - **Phase 3 — UI/UX Planning & Architecture Baseline:** [Design Tokens](docs/project/design/ui-ux/design-tokens.md), [Component Inventory](docs/project/design/ui-ux/component-inventory.md), [Wireframes Suite](docs/project/design/wireframes/), [Application Architecture](docs/project/design/architecture/application-architecture.md), [Engineering Standards](docs/project/design/standards/), [Phase 3 Assessment](docs/project/phase-3-assessment.md).
 - **Phase 4 — Repository and Application Foundation (Sprint 1):** [Phase 4 Assessment & Foundation Report](docs/project/phase-4-assessment.md).
+- **Phase 5 — Database Schema, Migrations, and Seed Data (Sprint 1):** [Phase 5 Database Assessment](docs/project/database/phase-5-assessment.md), [Migration Inventory](docs/project/database/migration-inventory.md), [Clean Installation Guide](docs/project/database/clean-installation-guide.md), [Existing Database Upgrade](docs/project/database/existing-database-upgrade.md).
 
 ## Installation
 
@@ -117,6 +119,10 @@ Follow these steps to set up the development environment:
      ```bash
      php tests/run_tests.php
      ```
+   - Run the database integration suite:
+     ```bash
+     php tests/run_tests.php --database
+     ```
    - Run the console health probe:
      ```bash
      php bin/console health
@@ -137,25 +143,31 @@ If you change the folder name, update the `BASE_URL` in `config/constants.php`:
 define('BASE_URL', '/Your-Folder-Name/');
 ```
 
-Database credentials can be updated in `config/database.php`.
+Database credentials can be updated in `config/database.php` or `.env`.
 
 ## Testing
 
-Run the automated unit test suite with:
+Run the automated test suite with:
 
 ```bash
-# Using native PHP runner (zero external dependencies)
+# Run unit and smoke tests (zero external dependencies)
 php tests/run_tests.php
+
+# Run database integration tests (against disposable test database)
+php tests/run_tests.php --database
+
+# Run complete test suite (Unit, Smoke, Database)
+php tests/run_tests.php --all
 
 # Or using Composer
 composer test
+composer run test:db
+composer run test:all
 ```
 
-Tests cover validation rules, date and service due calculations, currency formatting, authentication states, and RFC 6455 WebSocket framing.
+## Continuous Integration
 
-## Continuous integration
-
-GitHub Actions runs on pushes and pull requests. The workflow checks PHP syntax on PHP 8.0 and 8.5, runs the unit test suite, and verifies that `database/schema.sql` imports into MySQL 8.0. It does not deploy the application.
+GitHub Actions runs on pushes and pull requests. The workflow checks PHP syntax on PHP 8.0 and 8.5, runs the unit test suite, and verifies that `database/schema.sql` imports into MySQL 8.0.
 
 ## Author
-Developed as a complete Phase 1-38 implementation for a robust PHP native application.
+Developed as an enterprise-grade PHP native application.

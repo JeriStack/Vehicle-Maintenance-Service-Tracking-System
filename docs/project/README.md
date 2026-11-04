@@ -3,7 +3,7 @@
 
 Welcome to the central project governance and engineering repository for the **Vehicle Maintenance Service Tracking System (VMS)**.
 
-This directory contains the formal deliverables, technical specifications, requirements baselines, architectural models, and backlog planning established during **Phase 0 (Initiation & Feasibility)**, **Phase 1 (Requirements Confirmation & Backlog Baseline)**, **Phase 2 (Process Analysis & Technical Design)**, and **Phase 3 (UI/UX Planning & Architecture Baseline)**.
+This directory contains the formal deliverables, technical specifications, requirements baselines, architectural models, and backlog planning established during **Phase 0 (Initiation & Feasibility)**, **Phase 1 (Requirements Confirmation & Backlog Baseline)**, **Phase 2 (Process Analysis & Technical Design)**, **Phase 3 (UI/UX Planning & Architecture Baseline)**, **Phase 4 (Repository and Application Foundation)**, and **Phase 5 (Database Schema, Migrations, and Seed Data)**.
 
 ---
 
@@ -153,7 +153,28 @@ This directory contains the formal deliverables, technical specifications, requi
 
 ---
 
-## 6. Core Architectural Principles
+## 6. Phase 5 — Database Schema, Migrations, and Seed Data (Sprint 1)
+
+### Relational Engineering & Migration Deliverables (`database/`, `docs/project/database/`)
+
+| Deliverable | Description | Status |
+|---|---|---|
+| [**Migration Inventory**](database/migration-inventory.md) | Full registry of all 13 ordered migrations, execution order, affected tables, and dependency mapping | Complete |
+| [**Schema Implementation**](database/schema-implementation.md) | Physical table schema specifications, InnoDB storage engine, and utf8mb4 encoding across all 13 tables | Complete |
+| [**ERD Verification**](database/erd-verification.md) | Mermaid ERD model, relationship verification matrix, and cardinalities | Complete |
+| [**Foreign Key Catalogue**](database/foreign-key-catalogue.md) | Complete referential integrity catalogue, 15 foreign key constraints, deletion rules, and archival policies | Complete |
+| [**Index Catalogue**](database/index-catalogue.md) | Full index inventory, B-tree query optimizations, composite keys, and selectivity rationale | Complete |
+| [**Normalization & Constraints**](database/normalization-and-constraints.md) | Canonical email normalization, owner-scoped plate uniqueness (`BR-VEH-02`), and dedupe key algorithms | Complete |
+| [**Seed Data Specification**](database/seed-data.md) | Standardized maintenance catalog (8 items) with stable codes, slug routing, and idempotency rules | Complete |
+| [**Rollback & Forward-Fix Policy**](database/rollback-and-forward-fix-policy.md) | Relational DDL commit rules, reversible rollback operations, and forward-fix protocols | Complete |
+| [**Clean Installation Guide**](database/clean-installation-guide.md) | Scenario A installation sequence from an empty database to fully migrated/seeded state | Complete |
+| [**Existing Database Upgrade Guide**](database/existing-database-upgrade.md) | Scenario B safe upgrade procedure for pre-existing databases with 100% record preservation | Complete |
+| [**Database Integration Tests**](../../tests/Integration/Database/DatabaseIntegrationTest.php) | 10 automated database constraint tests covering migrations, FKs, unique keys, and deletion integrity | Complete |
+| [**Phase 5 Assessment Report**](database/phase-5-assessment.md) | Comprehensive Phase 5 and Sprint 1 database exit-gate assessment report | Complete |
+
+---
+
+## 7. Core Architectural Principles
 
 1. **Two-Role Model:** Exactly two system roles exist: `SYSTEM_ADMIN` and `VEHICLE_OWNER`. Mechanics and service centers are descriptive metadata attributes on service transactions, **not** authenticated user roles.
 2. **Strict Data Boundary:** Administrators oversee user accounts, global catalog maintenance types, audit logs, and system health. Administrators **do not** view private owner service histories without explicit user consent.

@@ -25,7 +25,8 @@
     },
     "scripts": {
         "test": "php tests/run_tests.php",
-        "test:smoke": "php tests/run_tests.php --smoke"
+        "test:smoke": "php tests/run_tests.php --smoke",
+        "test:db": "php tests/run_tests.php --database",
+        "test:all": "php tests/run_tests.php --all"
     }
 }
-

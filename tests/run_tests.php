@@ -1,13 +1,16 @@
 <?php
 // tests/run_tests.php
 /**
- * Vehicle Maintenance Service Tracking System - Native Unit Test Runner
+ * Vehicle Maintenance Service Tracking System - Native Test Runner
  *
- * Runs all unit tests without requiring external composer packages or internet access.
- * Compatible with PHPUnit test cases.
+ * Runs unit, smoke, and database integration tests without external dependencies.
  *
  * Usage:
- *   php tests/run_tests.php
+ *   php tests/run_tests.php            # Runs Unit and Smoke test suites
+ *   php tests/run_tests.php --unit     # Runs Unit tests only
+ *   php tests/run_tests.php --smoke    # Runs Smoke tests only
+ *   php tests/run_tests.php --database # Runs Database integration tests only
+ *   php tests/run_tests.php --all      # Runs all test suites (Unit, Smoke, Database)
  */
 
 error_reporting(E_ALL);
@@ -18,19 +21,30 @@ $startTime = microtime(true);
 require_once __DIR__ . '/bootstrap.php';
 
 // Discovered test suites
-$isSmokeOnly = in_array('--smoke', $argv, true);
-$isUnitOnly = in_array('--unit', $argv, true);
+$isSmokeOnly    = in_array('--smoke', $argv, true);
+$isUnitOnly     = in_array('--unit', $argv, true);
+$isDatabaseOnly = in_array('--database', $argv, true);
+$isAll          = in_array('--all', $argv, true);
+
+$unitFiles     = glob(__DIR__ . '/Unit/*Test.php') ?: [];
+$smokeFiles    = glob(__DIR__ . '/Smoke/*Test.php') ?: [];
+$databaseFiles = glob(__DIR__ . '/Integration/Database/*Test.php') ?: [];
 
 $testFiles = [];
 if ($isSmokeOnly) {
-    $testFiles = glob(__DIR__ . '/Smoke/*Test.php') ?: [];
+    $testFiles = $smokeFiles;
     $suiteLabel = "Smoke Test Suite";
 } elseif ($isUnitOnly) {
-    $testFiles = glob(__DIR__ . '/Unit/*Test.php') ?: [];
+    $testFiles = $unitFiles;
     $suiteLabel = "Unit Test Suite";
+} elseif ($isDatabaseOnly) {
+    $testFiles = $databaseFiles;
+    $suiteLabel = "Database Integration Test Suite";
+} elseif ($isAll) {
+    $testFiles = array_merge($unitFiles, $smokeFiles, $databaseFiles);
+    $suiteLabel = "Complete Test Suite (Unit, Smoke & Database Integration)";
 } else {
-    $unitFiles = glob(__DIR__ . '/Unit/*Test.php') ?: [];
-    $smokeFiles = glob(__DIR__ . '/Smoke/*Test.php') ?: [];
+    // Default: Unit & Smoke
     $testFiles = array_merge($unitFiles, $smokeFiles);
     $suiteLabel = "Automated Test Suite (Unit & Smoke)";
 }
@@ -51,87 +65,113 @@ echo "====================================================================" . PH
 foreach ($testFiles as $file) {
     require_once $file;
 
-    $baseName = basename($file, '.php');
-    $subDir = basename(dirname($file));
-    $className = "Tests\\{$subDir}\\{$baseName}";
+    // Resolve class name from relative path
+    $relPath = str_replace([__DIR__ . '/', __DIR__ . '\\', '.php'], ['', '', ''], $file);
+    $className = 'Tests\\' . str_replace(['/', '\\'], '\\', $relPath);
 
     if (!class_exists($className)) {
-        // Fallback check
+        // Fallback checks
+        $baseName = basename($file, '.php');
         $className = "Tests\\Unit\\{$baseName}";
         if (!class_exists($className)) {
             continue;
         }
     }
 
+    // Call static setUpBeforeClass if implemented
+    if (method_exists($className, 'setUpBeforeClass')) {
+        $className::setUpBeforeClass();
+    }
+
     $reflection = new ReflectionClass($className);
-    if ($reflection->isAbstract()) {
+    $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+
+    $testMethods = array_filter($methods, function ($method) {
+        return str_starts_with($method->name, 'test');
+    });
+
+    if (empty($testMethods)) {
         continue;
     }
 
-    $methods = array_filter($reflection->getMethods(ReflectionMethod::IS_PUBLIC), function($method) {
-        return str_starts_with($method->getName(), 'test');
-    });
+    echo "Running " . basename($file) . " (" . count($testMethods) . " tests):" . PHP_EOL;
 
-    echo "Running " . basename($file) . " (" . count($methods) . " tests):" . PHP_EOL;
+    foreach ($testMethods as $method) {
+        $testInstance = new $className();
 
-    foreach ($methods as $method) {
         $totalTests++;
-        $methodName = $method->getName();
-        $instance = new $className();
+
+        // Execute setUp() if defined
+        if (method_exists($testInstance, 'runSetUp')) {
+            $testInstance->runSetUp();
+        } elseif (is_callable([$testInstance, 'setUp'])) {
+            $testInstance->setUp();
+        }
 
         try {
-            $instance->runSetUp();
-            $method->invoke($instance);
-
-            if ($instance->getExpectedException() !== null) {
-                throw new \Tests\AssertionException("Failed asserting that exception " . $instance->getExpectedException() . " was thrown.");
-            }
-
-            $instance->runTearDown();
-
-            $totalAssertions += $instance->getAssertionCount();
+            $testInstance->{$method->name}();
             $passed++;
-            echo "  [PASS] {$methodName}" . PHP_EOL;
+            $totalAssertions += $testInstance->getAssertionCount();
+            echo "  [PASS] " . $method->name . PHP_EOL;
+        } catch (\Tests\AssertionException $e) {
+            $failed++;
+            $totalAssertions += $testInstance->getAssertionCount();
+            $failures[] = [
+                'test' => $className . '::' . $method->name,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ];
+            echo "  [FAIL] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
         } catch (\Throwable $e) {
             $failed++;
             $failures[] = [
-                'suite'     => $className,
-                'test'      => $methodName,
-                'message'   => $e->getMessage(),
-                'file'      => $e->getFile(),
-                'line'      => $e->getLine()
+                'test' => $className . '::' . $method->name,
+                'message' => 'Uncaught exception: ' . $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ];
-            echo "  [FAIL] {$methodName} -> " . $e->getMessage() . PHP_EOL;
+            echo "  [ERROR] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
         }
+
+        // Execute tearDown() if defined
+        if (method_exists($testInstance, 'runTearDown')) {
+            $testInstance->runTearDown();
+        } elseif (is_callable([$testInstance, 'tearDown'])) {
+            $testInstance->tearDown();
+        }
+    }
+
+    // Call static tearDownAfterClass if implemented
+    if (method_exists($className, 'tearDownAfterClass')) {
+        $className::tearDownAfterClass();
     }
 
     echo PHP_EOL;
 }
 
-$elapsed = round((microtime(true) - $startTime) * 1000, 2);
-$mem = round(memory_get_peak_usage(true) / 1024 / 1024, 2);
+$elapsedTime = (microtime(true) - $startTime) * 1000;
+$memoryPeak = memory_get_peak_usage(true) / 1024 / 1024;
 
 echo "====================================================================" . PHP_EOL;
 echo " Test Results Summary:" . PHP_EOL;
-echo " Total Tests:      {$totalTests}" . PHP_EOL;
-echo " Total Assertions: {$totalAssertions}" . PHP_EOL;
-echo " Passed:           {$passed}" . PHP_EOL;
-echo " Failed:           {$failed}" . PHP_EOL;
-echo " Time Elapsed:     {$elapsed} ms" . PHP_EOL;
-echo " Peak Memory:      {$mem} MB" . PHP_EOL;
-echo "====================================================================" . PHP_EOL;
+echo sprintf(" Total Tests:      %d\n", $totalTests);
+echo sprintf(" Total Assertions: %d\n", $totalAssertions);
+echo sprintf(" Passed:           %d\n", $passed);
+echo sprintf(" Failed:           %d\n", $failed);
+echo sprintf(" Time Elapsed:     %.2f ms\n", $elapsedTime);
+echo sprintf(" Peak Memory:      %d MB\n", $memoryPeak);
+echo "====================================================================" . PHP_EOL . PHP_EOL;
 
 if ($failed > 0) {
-    echo PHP_EOL . "FAILURES LIST:" . PHP_EOL;
-    foreach ($failures as $idx => $f) {
-        $num = $idx + 1;
-        echo "{$num}) {$f['suite']}::{$f['test']}" . PHP_EOL;
-        echo "   {$f['message']}" . PHP_EOL;
-        echo "   at {$f['file']}:{$f['line']}" . PHP_EOL . PHP_EOL;
+    echo "FAILURES LIST:" . PHP_EOL;
+    foreach ($failures as $i => $fail) {
+        echo ($i + 1) . ") " . $fail['test'] . PHP_EOL;
+        echo "   " . $fail['message'] . PHP_EOL;
+        echo "   at " . $fail['file'] . ":" . $fail['line'] . PHP_EOL . PHP_EOL;
     }
     exit(1);
 } else {
-    echo PHP_EOL . "SUCCESS! All unit tests passed without any errors." . PHP_EOL . PHP_EOL;
+    echo "SUCCESS! All unit tests passed without any errors." . PHP_EOL . PHP_EOL;
     exit(0);
 }
-

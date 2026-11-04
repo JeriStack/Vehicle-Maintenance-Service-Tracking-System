@@ -64,6 +64,9 @@ class MigrationRunner
             return [];
         }
 
+        // Exclude down migration files from regular forward migrations
+        $files = array_filter($files, fn($f) => !str_ends_with($f, '.down.sql'));
+
         // Sort naturally by filename
         sort($files, SORT_NATURAL);
 
@@ -156,5 +159,46 @@ class MigrationRunner
         }
 
         return $executed;
+    }
+
+    /**
+     * Rollback the latest batch of applied migrations.
+     *
+     * @return array List of rolled-back migration filenames
+     */
+    public function rollback(): array
+    {
+        $stmt = $this->db->query("SELECT MAX(batch) AS max_batch FROM migrations");
+        $maxBatch = $stmt->fetchColumn();
+
+        if ($maxBatch === null || (int) $maxBatch === 0) {
+            return [];
+        }
+
+        $stmt = $this->db->prepare("SELECT id, migration FROM migrations WHERE batch = :batch ORDER BY id DESC");
+        $stmt->execute([':batch' => (int) $maxBatch]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $rolledBack = [];
+
+        foreach ($rows as $row) {
+            $filename = $row['migration'];
+            $downFile = $this->migrationsPath . '/' . str_replace('.sql', '.down.sql', $filename);
+
+            if (file_exists($downFile)) {
+                $sql = file_get_contents($downFile);
+                if ($sql !== false && trim($sql) !== '') {
+                    $this->db->exec($sql);
+                }
+            }
+
+            // Remove record from tracking table
+            $del = $this->db->prepare("DELETE FROM migrations WHERE id = :id");
+            $del->execute([':id' => $row['id']]);
+
+            $rolledBack[] = $filename;
+        }
+
+        return $rolledBack;
     }
 }
