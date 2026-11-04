@@ -1,0 +1,317 @@
+================================================================================
+Vehicle Maintenance Service Tracking System - Setup & Deployment Notes
+================================================================================
+
+1. QUICK START (LOCAL DEVELOPMENT)
+--------------------------------------------------------------------------------
+1. Install a local PHP/MySQL stack (e.g., XAMPP, WAMP, Laragon, or Docker/native LAMP).
+2. Clone/copy this project inside your web root:
+   - For XAMPP (Windows): C:\xampp\htdocs\Vehicle-Maintenance-Service-Tracking-System\
+   - For Linux (Apache): /var/www/html/Vehicle-Maintenance-Service-Tracking-System/
+3. Ensure MySQL / MariaDB service is running.
+4. Create the MySQL database:
+   - Open phpMyAdmin or MySQL CLI and run:
+     CREATE DATABASE vehicle_maintenance_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+5. Import database structure and data:
+   - Import database/schema.sql (creates all required tables, indexes, and realtime_events queue).
+   - (Optional for demo/testing) Import database/seed.sql (populates demo users, vehicles, and records).
+   - If upgrading an existing database, run migrations in database/migrations/:
+     * database/migrations/create_realtime_events_table.sql
+     * database/migrations/create_auth_tokens_tables.sql
+     * database/migrations/align_with_blueprint_schema.sql
+6. Verify and update database configuration in config/database.php:
+   - DB_HOST (default: 'localhost')
+   - DB_NAME (default: 'vehicle_maintenance_db')
+   - DB_USER (default: 'root')
+   - DB_PASS (default: '')
+7. Verify BASE_URL in config/constants.php:
+   - Automatically computed dynamically, but ensure it resolves correctly if you change the folder name or use a custom VirtualHost.
+8. Ensure writable directories:
+   - logs/ (needs write access for app.log and websocket.log)
+   - uploads/vehicle_documents/ (needs write access for document uploads)
+9. Access the application in your web browser:
+   http://localhost/Vehicle-Maintenance-Service-Tracking-System/
+10. (Optional for Instant Real-Time) Start the WebSocket Server:
+    - Double click start_websocket.bat or run `php websocket/server.php` in a terminal.
+
+
+2. SYSTEM PREREQUISITES & PHP EXTENSIONS
+--------------------------------------------------------------------------------
+- Web Server: Apache 2.4+ (with mod_rewrite and mod_headers enabled) or Nginx with PHP-FPM
+- PHP Runtime: PHP 8.0, 8.1, 8.2, 8.3, or 8.4+
+- Required PHP Extensions (enable in php.ini):
+  * pdo_mysql        - Core PDO driver for MySQL database transactions
+  * mbstring         - Multibyte string support for text encoding
+  * openssl          - Cryptographic functions & secure CSRF token generation
+  * session          - User authentication and flash messaging
+  * fileinfo         - MIME-type detection for document/receipt uploads
+  * json             - AJAX responses and Chart.js dataset serialization
+  * curl             - Optional: needed if integrating outbound SMS/Email APIs
+  * gd / imagick     - Optional: if handling vehicle photo or document thumbnails
+- Database Engine: MySQL 8.0+ or MariaDB 10.4+ with InnoDB engine and utf8mb4 support
+
+
+3. DEMO ACCOUNTS & SEED DATA
+--------------------------------------------------------------------------------
+If database/seed.sql was imported, the following default credentials are provided:
+
+- Administrator Account:
+  * URL:      http://localhost/Vehicle-Maintenance-Service-Tracking-System/auth/login.php
+  * Email:    admin@example.com
+  * Password: password123
+  * Role:     admin (redirects to admin/dashboard.php, can view all users, vehicles, and audit logs)
+
+- Standard User Account:
+  * Email:    demo@example.com
+  * Password: password123
+  * Role:     user (redirects to dashboard/index.php, manages personal vehicles & service records)
+
+* IMPORTANT: Change these passwords immediately before any staging or production deployment!
+
+
+4. APPLICATION CONFIGURATION & ENVIRONMENT TUNING
+--------------------------------------------------------------------------------
+1. Timezone Configuration:
+   - Open config/app.php.
+   - Adjust `date_default_timezone_set('UTC');` to your local operations timezone 
+     (e.g., 'America/New_York', 'Asia/Manila', 'Europe/London').
+   - Consistent timezones prevent mismatched due-date calculations and premature/late reminder alerts.
+
+2. Recommended php.ini Directives:
+   - upload_max_filesize = 10M       ; Allows scanned registration PDFs, insurance, and service receipts
+   - post_max_size = 12M             ; Slightly larger than upload_max_filesize
+   - memory_limit = 256M             ; Accommodates complex cost reports and large CSV exports
+   - session.cookie_httponly = 1     ; Mitigates XSS cookie theft
+   - session.cookie_samesite = Lax   ; CSRF defense on top of token validation
+
+3. Production Error Handling:
+   - Development: display_errors = On, log_errors = On
+   - Production:  display_errors = Off, log_errors = On, error_log = /path/to/logs/php_errors.log
+
+
+5. DIRECTORY PERMISSIONS & STORAGE SECURITY
+--------------------------------------------------------------------------------
+1. logs/ Directory:
+   - Ensure web server process (e.g. www-data, apache, or IUSR) has read/write permissions.
+   - Linux:
+     chmod -R 775 logs/
+     chown -R www-data:www-data logs/
+
+2. uploads/vehicle_documents/ Directory:
+   - Ensure writable for document and receipt uploads.
+   - Linux:
+     chmod -R 775 uploads/
+     chown -R www-data:www-data uploads/
+   - Upload security: Never allow direct PHP script execution inside uploads directory.
+     Create uploads/.htaccess with:
+       <FilesMatch "\.(php|phtml|php3|php4|php5|phar)$">
+           Deny from all
+       </FilesMatch>
+
+
+6. WEB SERVER CONFIGURATION
+--------------------------------------------------------------------------------
+A. Apache:
+   - Ensure AllowOverride All is enabled in Apache's httpd.conf / vhost for this directory:
+     <Directory "C:/xampp/htdocs/Vehicle-Maintenance-Service-Tracking-System">
+         Options -Indexes +FollowSymLinks
+         AllowOverride All
+         Require all granted
+     </Directory>
+   - The project includes a root .htaccess file that blocks direct HTTP access to
+     sensitive files (*.sql, *.log, *.ini, *.json, *.md) and injects security headers
+     (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection).
+
+B. Optional VirtualHost (e.g., http://vehicle-tracker.local):
+   <VirtualHost *:80>
+       ServerName vehicle-tracker.local
+       DocumentRoot "C:/xampp/htdocs/Vehicle-Maintenance-Service-Tracking-System"
+       <Directory "C:/xampp/htdocs/Vehicle-Maintenance-Service-Tracking-System">
+           AllowOverride All
+           Require all granted
+       </Directory>
+   </VirtualHost>
+   (Add `127.0.0.1 vehicle-tracker.local` to your hosts file if used).
+
+
+7. AUTOMATION & BACKGROUND REMINDERS (CRON / TASK SCHEDULER)
+--------------------------------------------------------------------------------
+While reminders are evaluated dynamically when a user loads pages (via includes/header.php),
+production deployments should run an automated daily job to process reminders and trigger alerts
+independently of user sessions.
+
+A. Headless Daily Script:
+   The system provides a dedicated CLI reminder command with process locking and deduplication:
+   `php bin/process_reminders.php`
+
+B. Linux / Unix Cron:
+   Add a daily cron job to run at 8:00 AM:
+   0 8 * * * php -f /var/www/html/Vehicle-Maintenance-Service-Tracking-System/bin/process_reminders.php >> /var/www/html/Vehicle-Maintenance-Service-Tracking-System/logs/cron.log 2>&1
+
+C. Windows Task Scheduler:
+   1. Open Task Scheduler -> Create Basic Task.
+   2. Trigger: Daily at 08:00 AM.
+   3. Action: Start a program.
+      - Program/script: C:\xampp\php\php.exe
+      - Add arguments:  C:\xampp\htdocs\Vehicle-Maintenance-Service-Tracking-System\bin\process_reminders.php
+
+
+8. REAL-TIME WEBSOCKET SETUP & USAGE
+--------------------------------------------------------------------------------
+The application includes a fully native, zero-dependency RFC 6455 WebSocket implementation
+delivering real-time maintenance alerts, overdue reminders, and vehicle/service updates directly
+to open browser tabs.
+
+A. Architecture Overview:
+   - WebSocket Server: websocket/server.php (runs as a long-lived CLI daemon on port 8080).
+   - Configuration:    config/websocket.php (host, port, secret key, poll frequency).
+   - Event Dispatcher: helpers/websocket_helper.php (direct TCP broadcast + DB queue fallback).
+   - Client Engine:    assets/js/notifications.js (auto-reconnecting WebSocket client with
+                       Bootstrap 5 floating toast alerts, live bell badge counters, and
+                       fallback background polling).
+
+B. How to Start the WebSocket Server:
+   - Windows (XAMPP / local):
+     Double-click `start_websocket.bat`
+     OR run in Command Prompt / PowerShell:
+       php websocket/server.php
+   - Linux / macOS:
+     chmod +x start_websocket.sh
+     ./start_websocket.sh
+     OR run as a background service:
+       nohup php websocket/server.php > logs/websocket.log 2>&1 &
+
+C. Systemd Service (Linux Production):
+   Create /etc/systemd/system/vms-websocket.service:
+     [Unit]
+     Description=Vehicle Maintenance Tracking System WebSocket Server
+     After=network.target mysql.service
+
+     [Service]
+     Type=simple
+     User=www-data
+     WorkingDirectory=/var/www/html/Vehicle-Maintenance-Service-Tracking-System
+     ExecStart=/usr/bin/php websocket/server.php
+     Restart=always
+     RestartSec=5
+
+     [Install]
+     WantedBy=multi-user.target
+
+   Enable and start the service:
+     sudo systemctl daemon-reload
+     sudo systemctl enable vms-websocket
+     sudo systemctl start vms-websocket
+
+D. How to Test Real-Time Notifications via CLI:
+   Run the included test client tool to push an instant alert to any logged-in user:
+     php websocket/test_client.php [user_id] [title] [message] [type]
+   Example:
+     php websocket/test_client.php 1 "Oil Change Overdue" "Immediate oil change required for Toyota Vios!" OVERDUE
+   The open browser window logged in as User #1 will instantly display a floating Bootstrap toast,
+   play a soft audio chime, increment the bell badge, and prepend the alert to the notification dropdown!
+
+E. Reverse Proxy for SSL / HTTPS (wss://):
+   In production using SSL (HTTPS), proxy the WebSocket connection through Apache or Nginx:
+   - Apache (enable mod_proxy and mod_proxy_wstunnel):
+     ProxyPass /ws/ ws://127.0.0.1:8080/
+     ProxyPassReverse /ws/ ws://127.0.0.1:8080/
+   - Nginx:
+     location /ws/ {
+         proxy_pass http://127.0.0.1:8080;
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection "Upgrade";
+         proxy_set_header Host $host;
+     }
+
+F. Resilience & Fallback:
+   If the WebSocket server is stopped or restarted, the frontend client seamlessly activates
+   an exponential backoff reconnect engine (2s -> 4s -> 8s -> 15s) and engages lightweight
+   AJAX polling every 15s. No notifications are lost.
+
+
+9. EMAIL SETUP & AUTHENTICATION ("REMEMBER ME" & "FORGOT PASSWORD")
+--------------------------------------------------------------------------------
+A. Real Email Account Configuration (config/mail.php):
+   To send password reset links and maintenance alerts using a real email account:
+   1. Open `config/mail.php`.
+   2. Configure your SMTP provider credentials:
+      - For Gmail:
+        * SMTP_HOST:       'smtp.gmail.com'
+        * SMTP_PORT:       587
+        * SMTP_ENCRYPTION: 'tls'
+        * SMTP_USER:       'yourname@gmail.com'
+        * SMTP_PASS:       'your-16-digit-app-password' (Generate via Google Account -> Security -> 2-Step Verification -> App passwords)
+        * MAIL_FROM_NAME:  'VMS Tracker'
+      - For Outlook / Office 365:
+        * SMTP_HOST:       'smtp.office365.com'
+        * SMTP_PORT:       587
+        * SMTP_ENCRYPTION: 'tls'
+      - For Local Testing / Development:
+        * Set MAIL_DRIVER to 'log' (or leave credentials blank).
+        * Reset links and outgoing emails will automatically be written to `logs/mail.log` without requiring an active internet connection.
+
+B. "Forgot Password?" Workflow:
+   - User clicks "Forgot password?" on the login page (`auth/forgot_password.php`).
+   - Submits their registered email address.
+   - The system generates a cryptographically secure random token, stores its SHA-256 hash in `password_resets`, and emails an expiring (60-minute) branded reset link.
+   - User opens the link (`auth/reset_password.php?token=...&email=...`), enters a new password, and all previous reset tokens and remember-me sessions are invalidated for security.
+
+C. "Remember Me" Workflow:
+   - Checking "Remember me" on login issues a secure 30-day cookie (`vms_remember`) with a selector/validator split-token design.
+   - Only the validator's SHA-256 hash is saved in `remember_tokens` table to prevent token theft from database leaks.
+   - On each automatic login, the validator is rotated to prevent replay attacks.
+   - Logging out (`auth/logout.php`) completely deletes the database token and destroys the cookie.
+
+D. Database Migration:
+   - For existing databases, import:
+     `database/migrations/create_auth_tokens_tables.sql`
+   - It creates `remember_tokens` and `password_resets` tables with proper foreign keys and indexes.
+
+
+10. PRODUCTION SECURITY & HARDENING CHECKLIST
+--------------------------------------------------------------------------------
+[ ] Change default passwords for admin@example.com and demo@example.com.
+[ ] Enforce HTTPS/SSL with automatic HTTP-to-HTTPS redirect.
+[ ] Ensure config/database.php has production credentials with limited DB privileges.
+[ ] Ensure .htaccess is active and blocks direct access to database/schema.sql and logs/app.log.
+[ ] Ensure display_errors is turned OFF in production to prevent path or SQL disclosure.
+[ ] Set session.cookie_secure = 1 in php.ini when HTTPS is active.
+[ ] Validate that uploads folder disallows script execution.
+[ ] Schedule regular database backups using mysqldump or automated cloud backups:
+    mysqldump -u root -p vehicle_maintenance_db > backup_$(date +%F).sql
+
+
+11. POST-SETUP VERIFICATION & SMOKE TEST
+--------------------------------------------------------------------------------
+1. Automated Unit Tests:
+   - Run `php tests/run_tests.php` or `composer test`.
+   - Verify that all unit test suites execute and pass with 0 failures.
+2. Database Connectivity:
+   - Navigate to http://localhost/Vehicle-Maintenance-Service-Tracking-System/auth/login.php.
+   - If no database error appears, database connection was successful.
+3. Authentication:
+   - Log in with demo@example.com / password123. Ensure redirect to dashboard/index.php.
+   - Log out, log in with admin@example.com / password123. Ensure redirect to admin/dashboard.php.
+4. WebSocket Real-Time Alerts:
+   - Open terminal and start the WebSocket server: `php websocket/server.php` or run `start_websocket.bat`.
+   - Log into the web application in a browser window.
+   - In another terminal, run:
+     php websocket/test_client.php 1 "Brake Inspection Due" "Scheduled brake inspection due today" DUE
+   - Verify that:
+     * A floating toast appears in the top right.
+     * The bell icon badge shows unread count.
+     * The notification appears at the top of the navbar dropdown.
+4. Vehicle Management:
+   - Add a test vehicle with license plate, VIN, and registration expiry.
+   - Verify toast alert appears and details persist.
+5. Maintenance & Reminders:
+   - Add a service record with next scheduled service date within 7 days.
+   - Verify notification counter increases and real-time alert is triggered.
+6. Reporting:
+   - Visit Reports -> Export CSV to confirm download starts cleanly without PHP warnings.
+   - Check Reports -> Cost Analytics for correct chart and summary rendering.
+7. Audit Logging:
+   - As an admin, visit Admin -> Audit Logs to ensure user actions are being recorded.
+================================================================================

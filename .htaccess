@@ -1,0 +1,32 @@
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+<FilesMatch "\.(ini|log|sql|json|md)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Security Headers (if mod_headers is enabled)
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Handle errors gracefully
+ErrorDocument 403 /Vehicle-Maintenance-Service-Tracking-System/index.php
+ErrorDocument 404 /Vehicle-Maintenance-Service-Tracking-System/index.php
+
+# Basic Rewrite (if needed for nice URLs later)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Uncomment if using router: RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>
