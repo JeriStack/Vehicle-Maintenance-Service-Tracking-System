@@ -46,5 +46,9 @@ define('BASE_URL', '/Your-Folder-Name/');
 
 Database credentials can be updated in `config/database.php`.
 
+## Continuous integration
+
+GitHub Actions runs on pushes and pull requests. The workflow checks PHP syntax on PHP 8.0 and 8.5 and verifies that `database/schema.sql` imports into MySQL 8.0. It does not deploy the application.
+
 ## Author
 Developed as a complete Phase 1-38 implementation for a robust PHP native application.
