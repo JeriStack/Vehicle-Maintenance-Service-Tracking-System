@@ -3,7 +3,7 @@
 
 Welcome to the central project governance and engineering repository for the **Vehicle Maintenance Service Tracking System (VMS)**.
 
-This directory contains the formal deliverables, technical specifications, requirements baselines, architectural models, and backlog planning established during **Phase 0 (Initiation & Feasibility)**, **Phase 1 (Requirements Confirmation & Backlog Baseline)**, and **Phase 2 (Process Analysis & Technical Design)**.
+This directory contains the formal deliverables, technical specifications, requirements baselines, architectural models, and backlog planning established during **Phase 0 (Initiation & Feasibility)**, **Phase 1 (Requirements Confirmation & Backlog Baseline)**, **Phase 2 (Process Analysis & Technical Design)**, and **Phase 3 (UI/UX Planning & Architecture Baseline)**.
 
 ---
 
@@ -84,7 +84,55 @@ This directory contains the formal deliverables, technical specifications, requi
 
 ---
 
-## 4. Core Architectural Principles
+## 4. Phase 3 — UI/UX Planning & Architecture Baseline
+
+### A. Design System & Layout Specifications (`docs/project/design/ui-ux/`)
+
+| Document | Description | Status |
+|---|---|---|
+| [**Wireframe Inventory**](design/ui-ux/wireframe-inventory.md) | Authoritative catalogue of 19 screens and shared layout shells | Complete |
+| [**Wireframe Specifications**](design/ui-ux/wireframe-specifications.md) | Layout geometry, functional zones, modal dialogues, and tabular representations | Complete |
+| [**Responsive Multi-Device Behavior**](design/ui-ux/responsive-behavior.md) | Breakpoint rules, table-to-card transformations, off-canvas drawers, touch targets | Complete |
+| [**Design Token System**](design/ui-ux/design-tokens.md) | Approved Navy, Teal, White, Light-Gray palette, spacing scales, and typography | Complete |
+| [**Component Inventory**](design/ui-ux/component-inventory.md) | Shared UI components, properties, operational states, and accessibility specs | Complete |
+| [**Navigation Architecture**](design/ui-ux/navigation-structure.md) | Role-specific menu trees for Owner and Administrator with server-side enforcement | Complete |
+| [**UI Implementation Checklist**](design/ui-ux/ui-implementation-checklist.md) | Mandatory pre-commit quality and WCAG 2.1 AA accessibility audit checklist | Complete |
+
+### B. Wireframe Suite (`docs/project/design/wireframes/`)
+
+| Document | Description | Status |
+|---|---|---|
+| [**Authentication Wireframes**](design/wireframes/authentication/authentication-wireframes.md) | Desktop & mobile wireframes for Login, Register, Forgot Password, Reset Password | Complete |
+| [**Vehicle Owner Wireframes**](design/wireframes/owner/owner-wireframes.md) | Desktop & mobile wireframes for Dashboard, Garage, Services, Schedules, Reports | Complete |
+| [**Administrator Wireframes**](design/wireframes/admin/admin-wireframes.md) | Desktop & mobile wireframes for Governance Dashboard, Users, Catalog, Audit Logs | Complete |
+| [**Shared Component Wireframes**](design/wireframes/shared/shared-wireframes.md) | Wireframes for Topbar, Sidebar, Notification Drawer, Modals, Toasts, Skeletons | Complete |
+
+### C. Application Architecture Baseline (`docs/project/design/architecture/`)
+
+| Document | Description | Status |
+|---|---|---|
+| [**Application Architecture**](design/architecture/application-architecture.md) | 5-tier architecture, native PHP core, and dual-mode real-time event pipeline | Complete |
+| [**Request Lifecycle**](design/architecture/request-lifecycle.md) | 11-stage deterministic request execution pipeline from routing to view render | Complete |
+| [**Directory Structure & PSR-4**](design/architecture/directory-structure.md) | Existing module mapping, root entry preservation, and target `app/` hierarchy | Complete |
+| [**Component Responsibilities**](design/architecture/component-responsibilities.md) | Single Responsibility Principle (SRP) assignments across all 7 layers | Complete |
+| [**Architecture Baseline**](design/architecture/architecture-baseline.md) | Performance SLAs (TTFB < 150ms, DB < 25ms, WS < 80ms) and operational limits | Complete |
+
+### D. Development Standards (`docs/project/design/standards/`)
+
+| Document | Description | Status |
+|---|---|---|
+| [**Coding Conventions**](design/standards/coding-conventions.md) | PHP 8+ strict typing, PSR-12 formatting, explicit method signatures, PHPDoc | Complete |
+| [**Naming Conventions**](design/standards/naming-conventions.md) | Standardized naming for classes, methods, database elements, migrations, routes | Complete |
+| [**Error Response Conventions**](design/standards/error-handling.md) | HTML status codes (400-500), structured JSON error responses, leakage defense | Complete |
+| [**Logging Standards**](design/standards/logging-standards.md) | Structured JSON logging, RFC 5424 levels, dedicated channels, secret redaction | Complete |
+| [**Testing Standards**](design/standards/testing-standards.md) | PHPUnit conventions, categorization, rollback database isolation, coverage | Complete |
+| [**Migration Standards**](design/standards/migration-standards.md) | Timestamp naming (`YYYYMMDDHHMMSS_{desc}.sql`), idempotency, rollback scripts | Complete |
+| [**Code Review Checklist**](design/standards/code-review-checklist.md) | 20-point engineering pull-request audit gate across security, quality, tests | Complete |
+| [**Phase 3 Assessment**](phase-3-assessment.md) | Phase 3 exit-gate assessment and architecture baseline report | Complete |
+
+---
+
+## 5. Core Architectural Principles
 
 1. **Two-Role Model:** Exactly two system roles exist: `SYSTEM_ADMIN` and `VEHICLE_OWNER`. Mechanics and service centers are descriptive metadata attributes on service transactions, **not** authenticated user roles.
 2. **Strict Data Boundary:** Administrators oversee user accounts, global catalog maintenance types, audit logs, and system health. Administrators **do not** view private owner service histories without explicit user consent.

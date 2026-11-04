@@ -26,6 +26,7 @@ Formal engineering deliverables and project management baselines are located in 
 - **Phase 0 — Project Initiation & Feasibility:** [Project Charter](docs/project/project-charter.md), [Scope Statement](docs/project/scope-statement.md), [Environment Baseline](docs/project/environment-baseline.md), [Phase 0 Assessment](docs/project/phase-0-assessment.md).
 - **Phase 1 — Requirements & Backlog:** [Requirements Baseline](docs/project/requirements/requirements-baseline.md), [Product Backlog](docs/project/backlog/product-backlog.md), [Traceability Matrix](docs/project/requirements/traceability-matrix.md), [Phase 1 Assessment](docs/project/phase-1-assessment.md).
 - **Phase 2 — Process Analysis & Design:** [Process Analysis](docs/project/design/process-analysis.md), [Architecture Decisions (ADRs)](docs/project/design/architecture-decision-records.md), [Data Dictionary](docs/project/design/database/data-dictionary.md), [Route Map](docs/project/design/routing/route-map.md), [Threat Model](docs/project/design/security/threat-model.md), [Phase 2 Assessment](docs/project/phase-2-assessment.md).
+- **Phase 3 — UI/UX Planning & Architecture Baseline:** [Design Tokens](docs/project/design/ui-ux/design-tokens.md), [Component Inventory](docs/project/design/ui-ux/component-inventory.md), [Wireframes Suite](docs/project/design/wireframes/), [Application Architecture](docs/project/design/architecture/application-architecture.md), [Engineering Standards](docs/project/design/standards/), [Phase 3 Assessment](docs/project/phase-3-assessment.md).
 
 ## Installation
 
