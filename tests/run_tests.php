@@ -52,6 +52,7 @@ if ($isSmokeOnly) {
 $totalTests = 0;
 $totalAssertions = 0;
 $passed = 0;
+$skipped = 0;
 $failed = 0;
 $failures = [];
 
@@ -101,18 +102,21 @@ foreach ($testFiles as $file) {
 
         $totalTests++;
 
-        // Execute setUp() if defined
-        if (method_exists($testInstance, 'runSetUp')) {
-            $testInstance->runSetUp();
-        } elseif (is_callable([$testInstance, 'setUp'])) {
-            $testInstance->setUp();
-        }
-
         try {
+            // Execute setUp() if defined
+            if (method_exists($testInstance, 'runSetUp')) {
+                $testInstance->runSetUp();
+            } elseif (is_callable([$testInstance, 'setUp'])) {
+                $testInstance->setUp();
+            }
+
             $testInstance->{$method->name}();
             $passed++;
             $totalAssertions += $testInstance->getAssertionCount();
             echo "  [PASS] " . $method->name . PHP_EOL;
+        } catch (\Tests\SkippedTestException $e) {
+            $skipped++;
+            echo "  [SKIP] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
         } catch (\Tests\AssertionException $e) {
             $failed++;
             $totalAssertions += $testInstance->getAssertionCount();
@@ -132,13 +136,17 @@ foreach ($testFiles as $file) {
                 'line' => $e->getLine()
             ];
             echo "  [ERROR] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
-        }
-
-        // Execute tearDown() if defined
-        if (method_exists($testInstance, 'runTearDown')) {
-            $testInstance->runTearDown();
-        } elseif (is_callable([$testInstance, 'tearDown'])) {
-            $testInstance->tearDown();
+        } finally {
+            // Execute tearDown() if defined
+            try {
+                if (method_exists($testInstance, 'runTearDown')) {
+                    $testInstance->runTearDown();
+                } elseif (is_callable([$testInstance, 'tearDown'])) {
+                    $testInstance->tearDown();
+                }
+            } catch (\Throwable $t) {
+                // Ignore teardown errors on skipped/errored tests
+            }
         }
     }
 
@@ -158,6 +166,7 @@ echo " Test Results Summary:" . PHP_EOL;
 echo sprintf(" Total Tests:      %d\n", $totalTests);
 echo sprintf(" Total Assertions: %d\n", $totalAssertions);
 echo sprintf(" Passed:           %d\n", $passed);
+echo sprintf(" Skipped:          %d\n", $skipped);
 echo sprintf(" Failed:           %d\n", $failed);
 echo sprintf(" Time Elapsed:     %.2f ms\n", $elapsedTime);
 echo sprintf(" Peak Memory:      %d MB\n", $memoryPeak);

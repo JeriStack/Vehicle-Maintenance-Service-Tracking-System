@@ -3,6 +3,7 @@
 namespace Tests;
 
 class AssertionException extends \Exception {}
+class SkippedTestException extends \Exception {}
 
 if (class_exists('\PHPUnit\Framework\TestCase')) {
     abstract class BaseTestCase extends \PHPUnit\Framework\TestCase {}
@@ -13,6 +14,10 @@ if (class_exists('\PHPUnit\Framework\TestCase')) {
 
         public function getAssertionCount() {
             return $this->assertionCount;
+        }
+
+        public function markTestSkipped(string $message = ''): void {
+            throw new SkippedTestException($message);
         }
 
         public function expectException($exceptionClass) {

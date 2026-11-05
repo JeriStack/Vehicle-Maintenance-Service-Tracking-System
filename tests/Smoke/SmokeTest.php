@@ -31,6 +31,13 @@ class SmokeTest extends BaseTestCase
         Config::boot($this->basePath);
     }
 
+    protected function tearDown(): void
+    {
+        @restore_error_handler();
+        @restore_exception_handler();
+        parent::tearDown();
+    }
+
     /**
      * 1. Test Application Bootstrap
      */
