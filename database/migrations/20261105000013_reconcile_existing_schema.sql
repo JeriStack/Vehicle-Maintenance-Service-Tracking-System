@@ -110,3 +110,4 @@ BEGIN
 END;
 CALL _vms_reconcile_schema();
 DROP PROCEDURE IF EXISTS _vms_reconcile_schema;
+

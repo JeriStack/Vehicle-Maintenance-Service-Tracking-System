@@ -11,3 +11,4 @@ CREATE TABLE IF NOT EXISTS `vehicle_preferences` (
     CONSTRAINT `fk_vp_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE KEY `idx_vp_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

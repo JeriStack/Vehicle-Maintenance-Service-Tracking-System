@@ -49,3 +49,4 @@ To prevent data corruption, evasion of unique checks, and display inconsistencie
 | Reminder Lead Days Range | `notification_settings` | `reminder_days >= 1 AND reminder_days <= 30` | Advance reminder alert window is constrained between 1 and 30 days. |
 | Vehicle Service Interval | `vehicle_preferences` | `default_service_interval >= 1 AND default_service_interval <= 24` | Default calendar interval constrained between 1 and 24 months. |
 | Vehicle Mileage Interval | `vehicle_preferences` | `default_mileage_interval >= 1000 AND default_mileage_interval <= 20000` | Default distance interval constrained between 1,000 and 20,000 km. |
+

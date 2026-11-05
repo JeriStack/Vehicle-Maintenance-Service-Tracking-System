@@ -68,3 +68,4 @@ The VMS indexing architecture accelerates high-frequency operational query patte
 | `password_resets` | `idx_pr_email` | B-Tree | `email` | Lookup of pending password reset attempts by email |
 | `password_resets` | `idx_pr_token` | B-Tree | `token_hash` | Validation of submitted reset token hash |
 | `realtime_events` | `idx_re_processed` | B-Tree | `processed_at` | Daemon sweep for unprocessed WebSocket broadcast events |
+

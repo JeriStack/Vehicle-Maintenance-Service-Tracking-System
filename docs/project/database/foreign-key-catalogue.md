@@ -37,3 +37,4 @@ This catalogue formally records the referential integrity rules, foreign key act
 
 1. **Vehicles:** Vehicle deletion in the application UI executes a soft-archival operation (`status = 'archived'`). Under this policy, no cascading deletion takes place, guaranteeing that historical service invoices, cost tracking, and mileage logs remain 100% intact.
 2. **Maintenance Types:** Catalog service items must never be hard-deleted in production; instead, administrators set `is_active = 0`. Even if a catalog item is removed, the `SET NULL` deletion action preserves existing service history.
+

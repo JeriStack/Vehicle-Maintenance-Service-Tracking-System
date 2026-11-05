@@ -28,3 +28,4 @@ CREATE TABLE IF NOT EXISTS `service_records` (
     INDEX `idx_sr_next_date` (`next_service_date`),
     INDEX `idx_sr_composite_dash` (`vehicle_id`, `status`, `service_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

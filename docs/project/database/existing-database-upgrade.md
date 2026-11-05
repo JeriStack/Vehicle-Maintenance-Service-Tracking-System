@@ -67,3 +67,4 @@ Confirm that all 13 migrations are registered in `migrations`:
 ```bash
 php bin/console migrate:status
 ```
+

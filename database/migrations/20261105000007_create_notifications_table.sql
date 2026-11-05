@@ -21,3 +21,4 @@ CREATE TABLE IF NOT EXISTS `notifications` (
     INDEX `idx_notif_created_at` (`created_at`),
     INDEX `idx_notif_vehicle_id` (`vehicle_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

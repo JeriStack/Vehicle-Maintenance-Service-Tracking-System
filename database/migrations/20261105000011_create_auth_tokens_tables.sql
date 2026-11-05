@@ -24,3 +24,4 @@ CREATE TABLE IF NOT EXISTS `password_resets` (
     INDEX `idx_pr_token` (`token_hash`),
     INDEX `idx_pr_expires` (`expires_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

@@ -25,3 +25,4 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
     INDEX `idx_vehicles_status` (`status`),
     INDEX `idx_vehicles_make_model` (`make`, `model`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

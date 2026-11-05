@@ -154,3 +154,4 @@ All tables in the VMS relational architecture adhere strictly to enterprise pers
 - **`remember_tokens`:** Split-token authentication (`selector` VARCHAR(32) UNIQUE, `hashed_validator` VARCHAR(64), `expires_at` DATETIME, FK -> `users.id` ON DELETE CASCADE).
 - **`password_resets`:** Cryptographic reset tokens (`email` VARCHAR(255), `token_hash` VARCHAR(64), `expires_at` DATETIME).
 - **`realtime_events`:** WebSocket event queue (`channel`, `event`, `payload` LONGTEXT, `processed_at`).
+

@@ -75,3 +75,4 @@ Check application connectivity:
 php bin/console health
 ```
 Both probes must report successful connectivity, all tables present, and zero errors.
+

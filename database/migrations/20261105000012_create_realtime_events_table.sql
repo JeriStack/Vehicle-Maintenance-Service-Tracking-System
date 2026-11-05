@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS `realtime_events` (
     INDEX `idx_re_channel` (`channel`),
     INDEX `idx_re_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

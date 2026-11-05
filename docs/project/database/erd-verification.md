@@ -59,3 +59,4 @@ During Phase 5 preflight inspection, the following gaps in the pre-existing lega
 2. **Normalized Email:** The legacy schema lacked `email_normalized` for case-insensitive unique enforcement. Reconciled via `20261105000001_create_users_table.sql` and `20261105000013_reconcile_existing_schema.sql`.
 3. **Audit Actor Preservation:** Audit log previously lacked `actor_type` for CLI daemon attribution. Reconciled via `20261105000010_create_audit_logs_table.sql`.
 4. **Notification Deduplication:** Deduplication key was unindexed or missing in legacy environments. Enforced via `idx_notif_dedupe (dedupe_key UNIQUE)`.
+

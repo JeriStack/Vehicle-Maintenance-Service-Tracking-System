@@ -51,3 +51,4 @@ CREATE TABLE IF NOT EXISTS `migrations` (
 - Each migration run assigns an incremental `batch` number (`MAX(batch) + 1`).
 - Already applied migrations are skipped automatically.
 - Migration status is inspectable via `php bin/console migrate:status`.
+

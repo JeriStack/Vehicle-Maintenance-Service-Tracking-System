@@ -15,3 +15,4 @@ CREATE TABLE IF NOT EXISTS `vehicle_mileage_logs` (
     INDEX `idx_vml_vehicle_rec` (`vehicle_id`, `recorded_at`),
     INDEX `idx_vml_mileage` (`mileage`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

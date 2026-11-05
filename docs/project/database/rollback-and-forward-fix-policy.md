@@ -40,3 +40,4 @@ Before applying migrations against any non-disposable database:
 2. **Verify Backup Size:** Confirm that the output `.sql` file contains expected schema definitions and table data.
 3. **Execute Migrations:** Run `php bin/console migrate`.
 4. **Verify Status:** Check `php bin/console migrate:status` to ensure all files display `[Applied]` with their assigned batch number.
+

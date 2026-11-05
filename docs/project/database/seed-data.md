@@ -40,3 +40,4 @@ The seeder utilizes an `INSERT ... ON DUPLICATE KEY UPDATE` strategy keyed on `c
 - **Zero Test Accounts in Production Seeders:** Production reference seeders **never** insert demo user accounts, sample vehicles, or dummy credentials.
 - **Controlled Administrator Provisioning:** Administrator accounts are provisioned exclusively through controlled CLI setup commands or initial environment setup scripts, never hardcoded into baseline seeders.
 - **Automated Test Fixtures:** Automated tests construct isolated test fixtures within disposable test databases (`vms_disposable_test_db`), guaranteeing zero contamination of staging or production databases.
+
