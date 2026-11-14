@@ -200,13 +200,11 @@ class Session
                 );
             }
 
-            @session_destroy();
             if (php_sapi_name() !== 'cli') {
                 @session_destroy();
             }
         }
 
-        self::$started = false;
         self::$started = (php_sapi_name() === 'cli');
     }
 }

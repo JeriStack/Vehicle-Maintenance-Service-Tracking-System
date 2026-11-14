@@ -21,11 +21,11 @@ class Env
      */
     public static function load(string $path): bool
     {
-        if (!file_exists($path) || !is_readable($path)) {
+        if (!file_exists($path) || !is_file($path)) {
             return false;
         }
 
-        $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $lines = @file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
         if ($lines === false) {
             return false;
         }

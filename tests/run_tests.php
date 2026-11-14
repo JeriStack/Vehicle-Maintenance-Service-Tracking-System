@@ -134,19 +134,23 @@ foreach ($testFiles as $file) {
             ];
             echo "  [FAIL] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
         } catch (\Throwable $e) {
-            $failed++;
-            $failures[] = [
-                'test' => $className . '::' . $method->name,
-                'message' => 'Uncaught exception: ' . $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ];
-            echo "  [ERROR] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
             $expectedEx = method_exists($testInstance, 'getExpectedException') ? $testInstance->getExpectedException() : null;
             if ($expectedEx !== null && $e instanceof $expectedEx) {
-                $passed++;
-                $totalAssertions += $testInstance->getAssertionCount();
-                echo "  [PASS] " . $method->name . PHP_EOL;
+                $expectedMsg = method_exists($testInstance, 'getExpectedExceptionMessage') ? $testInstance->getExpectedExceptionMessage() : null;
+                if ($expectedMsg !== null && !str_contains($e->getMessage(), $expectedMsg)) {
+                    $failed++;
+                    $failures[] = [
+                        'test' => $className . '::' . $method->name,
+                        'message' => "Exception message '{$e->getMessage()}' does not contain '{$expectedMsg}'.",
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine()
+                    ];
+                    echo "  [FAIL] " . $method->name . " -> Exception message mismatch" . PHP_EOL;
+                } else {
+                    $passed++;
+                    $totalAssertions += $testInstance->getAssertionCount();
+                    echo "  [PASS] " . $method->name . PHP_EOL;
+                }
             } else {
                 $failed++;
                 $failures[] = [
