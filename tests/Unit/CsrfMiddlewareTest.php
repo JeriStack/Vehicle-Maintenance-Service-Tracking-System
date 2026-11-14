@@ -86,4 +86,17 @@ class CsrfMiddlewareTest extends TestCase
 
         $this->assertNull($mw->handle($request));
     }
+
+    public function testLegacySessionCsrfTokenSynchronization(): void
+    {
+        Session::start();
+        $legacyToken = bin2hex(random_bytes(32));
+        $_SESSION['csrf_token'] = $legacyToken;
+
+        $this->assertTrue(Csrf::validate($legacyToken), 'Legacy $_SESSION[csrf_token] must validate');
+        $this->assertSame($legacyToken, Csrf::token(), 'Csrf::token() must adopt existing legacy token');
+
+        $rotated = Csrf::rotate();
+        $this->assertSame($rotated, $_SESSION['csrf_token'], 'Csrf::rotate() must update legacy $_SESSION[csrf_token]');
+    }
 }

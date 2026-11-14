@@ -274,6 +274,43 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     color: #0ea5e9;
 }
 
+.auth-form .form-control.has-password-toggle {
+    border-right: none;
+    border-radius: 0;
+}
+
+.auth-form .password-toggle-btn {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: none;
+    border-radius: 0 10px 10px 0;
+    color: rgba(255, 255, 255, 0.65);
+    padding: 0 14px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-form .password-toggle-btn:hover,
+.auth-form .password-toggle-btn:focus-visible {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+    outline: none;
+}
+
+.auth-form .input-group:focus-within .password-toggle-btn {
+    border-color: #0ea5e9;
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+    color: #0ea5e9;
+}
+
 .auth-btn {
     height: 48px;
     border-radius: 10px;
