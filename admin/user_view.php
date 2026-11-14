@@ -93,9 +93,12 @@ try {
                     </li>
                 </ul>
             </div>
-            <div class="card-footer bg-white border-top-0 p-3 text-center">
+            <div class="card-footer bg-white border-top-0 p-3 text-center d-grid gap-2">
                 <button type="button" class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#changeRoleModal">
                     Manage Role
+                </button>
+                <button type="button" class="btn btn-outline-warning btn-sm w-100" data-bs-toggle="modal" data-bs-target="#toggleStatusModal">
+                    <?php echo ($user['status'] ?? 'active') === 'active' ? 'Deactivate Account' : 'Activate Account'; ?>
                 </button>
             </div>
         </div>
@@ -217,7 +220,7 @@ try {
             </div>
             <form action="<?php echo BASE_URL; ?>actions/admin_user_action.php" method="POST">
                 <div class="modal-body p-4">
-                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <?php echo \VMS\Core\Csrf::field(); ?>
                     <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                     <input type="hidden" name="action" value="change_role">
                     
@@ -233,11 +236,15 @@ try {
                                 Vehicle Owner (Normal User)
                             </label>
                         </div>
-                        <div class="form-check">
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="radio" name="new_role" id="roleAdmin" value="admin" <?php echo $user['role'] === 'admin' ? 'checked' : ''; ?>>
                             <label class="form-check-label" for="roleAdmin">
                                 Administrator (Full Access)
                             </label>
+                        </div>
+                        <div class="mb-0">
+                            <label for="roleAdminPassword" class="form-label fw-medium">Confirm Your Administrator Password</label>
+                            <input type="password" class="form-control" id="roleAdminPassword" name="admin_password" required autocomplete="current-password">
                         </div>
                     <?php endif; ?>
                 </div>
@@ -245,6 +252,49 @@ try {
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <?php if ($user['id'] !== currentUserId()): ?>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <?php endif; ?>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Modal -->
+<div class="modal fade" id="toggleStatusModal" tabindex="-1" aria-labelledby="toggleStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light border-bottom-0">
+                <h5 class="modal-title fw-bold" id="toggleStatusModalLabel">
+                    <?php echo ($user['status'] ?? 'active') === 'active' ? 'Deactivate Account' : 'Activate Account'; ?>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="<?php echo BASE_URL; ?>actions/admin_user_action.php" method="POST">
+                <div class="modal-body p-4">
+                    <?php echo \VMS\Core\Csrf::field(); ?>
+                    <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                    <input type="hidden" name="action" value="toggle_status">
+
+                    <?php if ($user['id'] === currentUserId()): ?>
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i> You cannot deactivate your own account.
+                        </div>
+                    <?php else: ?>
+                        <p class="mb-3">
+                            Are you sure you want to
+                            <strong><?php echo ($user['status'] ?? 'active') === 'active' ? 'deactivate' : 'activate'; ?></strong>
+                            the account for <strong><?php echo htmlspecialchars($user['full_name']); ?></strong>?
+                        </p>
+                        <div class="mb-0">
+                            <label for="statusAdminPassword" class="form-label fw-medium">Confirm Your Administrator Password</label>
+                            <input type="password" class="form-control" id="statusAdminPassword" name="admin_password" required autocomplete="current-password">
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="modal-footer bg-light border-top-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <?php if ($user['id'] !== currentUserId()): ?>
+                        <button type="submit" class="btn btn-warning">Confirm</button>
                     <?php endif; ?>
                 </div>
             </form>
