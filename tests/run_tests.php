@@ -111,6 +111,12 @@ foreach ($testFiles as $file) {
             }
 
             $testInstance->{$method->name}();
+
+            $expectedEx = method_exists($testInstance, 'getExpectedException') ? $testInstance->getExpectedException() : null;
+            if ($expectedEx !== null) {
+                throw new \Tests\AssertionException("Failed asserting that exception of type '{$expectedEx}' was thrown.");
+            }
+
             $passed++;
             $totalAssertions += $testInstance->getAssertionCount();
             echo "  [PASS] " . $method->name . PHP_EOL;
@@ -136,6 +142,21 @@ foreach ($testFiles as $file) {
                 'line' => $e->getLine()
             ];
             echo "  [ERROR] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
+            $expectedEx = method_exists($testInstance, 'getExpectedException') ? $testInstance->getExpectedException() : null;
+            if ($expectedEx !== null && $e instanceof $expectedEx) {
+                $passed++;
+                $totalAssertions += $testInstance->getAssertionCount();
+                echo "  [PASS] " . $method->name . PHP_EOL;
+            } else {
+                $failed++;
+                $failures[] = [
+                    'test' => $className . '::' . $method->name,
+                    'message' => 'Uncaught exception: ' . $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ];
+                echo "  [ERROR] " . $method->name . " -> " . $e->getMessage() . PHP_EOL;
+            }
         } finally {
             // Execute tearDown() if defined
             try {

@@ -135,4 +135,9 @@ class Request
         $normalized = strtolower($name);
         return $this->headers[$normalized] ?? $default;
     }
+
+    public function server(string $key, mixed $default = null): mixed
+    {
+        return $this->server[$key] ?? $default;
+    }
 }

@@ -150,12 +150,44 @@ class Session
     /**
      * Invalidate and destroy the active session and its cookie.
      */
+    /**
+     * Check if the authenticated session has exceeded the idle timeout.
+     */
+    public static function checkIdleTimeout(int $timeoutSeconds = 1800): bool
+    {
+        self::start();
+        $lastActivity = (int) self::get('last_activity', 0);
+        if ($lastActivity > 0 && (time() - $lastActivity) > $timeoutSeconds) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Record current timestamp as the latest authenticated session activity.
+     */
+    public static function recordActivity(): void
+    {
+        self::start();
+        self::set('last_activity', time());
+    }
+
+    /**
+     * Verify that the session auth_version matches the database security version.
+     */
+    public static function isAuthVersionValid(int $expectedVersion): bool
+    {
+        self::start();
+        $current = (int) self::get('auth_version', 1);
+        return $current === $expectedVersion;
+    }
+
     public static function destroy(): void
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION = [];
+        $_SESSION = [];
 
-            if (ini_get('session.use_cookies')) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            if (ini_get('session.use_cookies') && !headers_sent()) {
                 $params = session_get_cookie_params();
                 setcookie(
                     session_name(),
@@ -168,9 +200,13 @@ class Session
                 );
             }
 
-            session_destroy();
+            @session_destroy();
+            if (php_sapi_name() !== 'cli') {
+                @session_destroy();
+            }
         }
 
         self::$started = false;
+        self::$started = (php_sapi_name() === 'cli');
     }
 }
