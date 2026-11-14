@@ -1,0 +1,73 @@
+@startuml activity-vehicle-owner
+skinparam shadowing false
+skinparam monochrome false
+
+title Vehicle Owner Operations Activity
+
+start
+
+:Owner enters Vehicle Owner Dashboard;
+:Display Metric Cards (Total Vehicles, Active Reminders, Overdue, Total Spent);
+
+switch (Select Action?)
+case (Manage Vehicles)
+  :Navigate to /vehicles/index.php;
+  if (Add New Vehicle?) then (yes)
+    :Input Plate, Make, Model, Year, Odometer;
+    :Canonicalize Plate & Validate Bounds;
+    :Insert Vehicle into DB (status = 'Active');
+  else if (Edit Vehicle?) then (yes)
+    :Verify Owner-Scoped ID (WHERE id = ? AND user_id = ?);
+    :Input Updated Details;
+    :Validate Odometer >= Prior Reading;
+    :Update Vehicle Record & Append Mileage Log;
+  else if (Delete Vehicle?) then (yes)
+    :Confirm Deletion Dialog;
+    :Soft-Archive Vehicle (status = 'archived');
+    :Preserve All Associated Service Records;
+  endif
+
+case (Manage Services)
+  :Navigate to /services/create.php;
+  :Select Owned Vehicle;
+  :Input Service Type, Date, Mileage, Cost, Provider;
+  :Validate Date <= Today & Cost >= 0;
+  
+  fork
+    :Insert Completed Service Record;
+  fork again
+    if (Service Mileage > Vehicle Odometer?) then (yes)
+      :Advance Master Vehicle Odometer;
+      :Append Entry to vehicle_mileage_logs;
+    endif
+  fork again
+    if (Next Service Date or Km Provided?) then (yes)
+      :Create / Update maintenance_schedules;
+    endif
+  end fork
+  
+  :Trigger Real-Time WebSocket Broadcast;
+
+case (View Maintenance Status)
+  :Navigate to /maintenance/index.php;
+  :Execute Status Calculation Engine;
+  :Categorize as Upcoming, Due, or Overdue;
+  :Display Badges & Target Remaining Km/Days;
+
+case (View Reports)
+  :Navigate to /reports/costs.php;
+  :Query Owner-Scoped Historical Costs;
+  :Render Chart.js Monthly & Yearly Visuals;
+  if (Export CSV Requested?) then (yes)
+    :Stream RFC 4180 CSV via export_csv.php;
+  endif
+
+case (Notification Inbox)
+  :Open Notifications Feed;
+  :Review Reminders;
+  :Mark as Read (is_read = 1);
+endswitch
+
+stop
+@enduml
+

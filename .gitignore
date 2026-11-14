@@ -67,3 +67,24 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# Composer
+/vendor/
+.phpunit.result.cache
+
+# Environment Configuration
+.env
+.env.*
+!.env.example
+
+# Application Storage
+/storage/logs/*
+!/storage/logs/.gitkeep
+/storage/sessions/*
+!/storage/sessions/.gitkeep
+/storage/cache/*
+!/storage/cache/.gitkeep
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/backups/*
+!/storage/backups/.gitkeep

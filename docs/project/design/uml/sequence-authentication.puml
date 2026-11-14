@@ -1,0 +1,58 @@
+@startuml sequence-authentication
+autonumber
+skinparam shadowing false
+skinparam monochrome false
+
+title Authentication Sequence Diagram (Login, Session, Remember-Me)
+
+actor "User / Guest" as User
+participant "Browser" as Browser
+participant "auth/login.php" as LoginView
+participant "actions/login_action.php" as LoginAction
+participant "includes/auth.php" as AuthHelper
+participant "Database (PDO)" as DB
+participant "PHP Session" as Session
+
+User -> Browser: Navigate to /auth/login.php
+Browser -> LoginView: HTTP GET
+LoginView -> Session: Generate & store CSRF token
+Session --> LoginView: csrf_token
+LoginView --> Browser: Render glassmorphism login form
+
+User -> Browser: Input Email, Password, Check "Remember me"
+Browser -> LoginAction: HTTP POST (email, password, remember_me, csrf_token)
+
+LoginAction -> Session: Verify csrf_token
+alt CSRF Token Invalid
+  LoginAction --> Browser: Redirect with Flash Error
+end
+
+LoginAction -> DB: Query user by normalized email (SELECT * FROM users WHERE email = ?)
+DB --> LoginAction: User Record
+
+alt User Not Found OR password_verify() == false
+  LoginAction --> Browser: Redirect with "Invalid email address or password"
+else User Found & Password Valid
+  alt User Status == 'inactive'
+    LoginAction --> Browser: Redirect with "Account is deactivated"
+  else User Status == 'active'
+    LoginAction -> Session: session_regenerate_id(true)
+    LoginAction -> Session: Set user_id, user_name, role
+    
+    opt Remember Me Checked
+      LoginAction -> AuthHelper: generateRememberToken(user_id)
+      AuthHelper -> DB: INSERT INTO remember_tokens (user_id, selector, hashed_validator, expires_at)
+      DB --> AuthHelper: Success
+      AuthHelper --> Browser: Set-Cookie: vms_remember=selector:validator (HttpOnly, SameSite=Lax, 30 days)
+    end
+    
+    alt Role == 'admin'
+      LoginAction --> Browser: HTTP 302 Redirect to /admin/dashboard.php
+    else Role == 'user'
+      LoginAction --> Browser: HTTP 302 Redirect to /dashboard/index.php
+    end
+  end
+end
+
+@enduml
+

@@ -1,0 +1,141 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+// bin/console
+/**
+ * Vehicle Maintenance Service Tracking System - CLI Console
+ */
+
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    die("Access Denied: This tool can only be executed via the command line interface.\n");
+}
+
+$basePath = dirname(__DIR__);
+
+// Autoload dependencies or fallback PSR-4
+$autoloader = $basePath . '/vendor/autoload.php';
+if (file_exists($autoloader)) {
+    require_once $autoloader;
+} else {
+    spl_autoload_register(function (string $class) use ($basePath) {
+        $prefix = 'VMS\\';
+        if (str_starts_with($class, $prefix)) {
+            $relativeClass = substr($class, strlen($prefix));
+            $file = $basePath . '/app/' . str_replace('\\', '/', $relativeClass) . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
+        $seederPrefix = 'Database\\Seeders\\';
+        if (str_starts_with($class, $seederPrefix)) {
+            $relativeClass = substr($class, strlen($seederPrefix));
+            $file = $basePath . '/database/seeders/' . str_replace('\\', '/', $relativeClass) . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
+    });
+}
+
+// Bootstrap Configuration
+\VMS\Core\Config::boot($basePath);
+
+$args = $argv;
+array_shift($args); // remove script name
+$command = $args[0] ?? 'help';
+
+echo "====================================================================" . PHP_EOL;
+echo " Vehicle Maintenance Service Tracking System - Console Utility" . PHP_EOL;
+echo "====================================================================" . PHP_EOL;
+
+try {
+    switch ($command) {
+        case 'migrate':
+            echo "Running database migrations..." . PHP_EOL;
+            $runner = new \VMS\Core\MigrationRunner();
+            $executed = $runner->migrate();
+            if (empty($executed)) {
+                echo "Nothing to migrate. Database schema is already up to date." . PHP_EOL;
+            } else {
+                foreach ($executed as $m) {
+                    echo "  [DONE] Migrated: {$m}" . PHP_EOL;
+                }
+                echo "Migration completed successfully (" . count($executed) . " applied)." . PHP_EOL;
+            }
+            break;
+
+        case 'migrate:status':
+            $runner = new \VMS\Core\MigrationRunner();
+            $status = $runner->getStatus();
+            echo sprintf("%-52s | %-10s | %-6s | %-20s\n", "Migration File", "Status", "Batch", "Executed At");
+            echo str_repeat("-", 95) . PHP_EOL;
+            foreach ($status as $row) {
+                echo sprintf(
+                    "%-52s | %-10s | %-6s | %-20s\n",
+                    $row['migration'],
+                    $row['status'],
+                    $row['batch'] !== null ? (string)$row['batch'] : '-',
+                    $row['executed_at'] ?? 'Pending'
+                );
+            }
+            break;
+
+        case 'migrate:rollback':
+            echo "Rolling back latest migration batch..." . PHP_EOL;
+            $runner = new \VMS\Core\MigrationRunner();
+            $rolledBack = $runner->rollback();
+            if (empty($rolledBack)) {
+                echo "Nothing to rollback. No active migration batches found." . PHP_EOL;
+            } else {
+                foreach ($rolledBack as $m) {
+                    echo "  [DONE] Rolled back: {$m}" . PHP_EOL;
+                }
+                echo "Rollback completed successfully (" . count($rolledBack) . " reverted)." . PHP_EOL;
+            }
+            break;
+
+        case 'seed':
+            echo "Running reference data seeders..." . PHP_EOL;
+            $seederFile = $basePath . '/database/seeders/MaintenanceTypeSeeder.php';
+            if (file_exists($seederFile)) {
+                require_once $seederFile;
+            }
+            $seeder = new \Database\Seeders\MaintenanceTypeSeeder();
+            $count = $seeder->run();
+            echo "  [DONE] MaintenanceTypeSeeder: seeded {$count} catalog items." . PHP_EOL;
+            echo "Seeding completed successfully." . PHP_EOL;
+            break;
+
+        case 'health':
+            echo "Checking application health status..." . PHP_EOL;
+            $dbOk = \VMS\Core\Database::testConnection();
+            $logDir = $basePath . '/storage/logs';
+            $logWritable = is_writable($logDir) || (@file_put_contents($logDir . '/.probe', '1') !== false);
+            if (file_exists($logDir . '/.probe')) { @unlink($logDir . '/.probe'); }
+
+            echo "  [App Core]:      OK" . PHP_EOL;
+            echo "  [Database PDO]:  " . ($dbOk ? "CONNECTED (OK)" : "DISCONNECTED (FAIL)") . PHP_EOL;
+            echo "  [Storage Logs]:  " . ($logWritable ? "WRITABLE (OK)" : "NON-WRITABLE") . PHP_EOL;
+            echo "  [PHP Version]:   " . PHP_VERSION . PHP_EOL;
+            break;
+
+        case 'help':
+        default:
+            echo "Available commands:" . PHP_EOL;
+            echo "  migrate           Run all pending database schema migrations" . PHP_EOL;
+            echo "  migrate:status    Display the status of all registered migrations" . PHP_EOL;
+            echo "  migrate:rollback  Rollback the most recent migration batch" . PHP_EOL;
+            echo "  seed              Execute database reference data seeders" . PHP_EOL;
+            echo "  health            Perform environment and database connectivity probe" . PHP_EOL;
+            echo "  help              Display this command usage overview" . PHP_EOL;
+            break;
+    }
+} catch (\Throwable $e) {
+    echo "ERROR: " . $e->getMessage() . PHP_EOL;
+    exit(1);
+}
+
+echo PHP_EOL;
+exit(0);

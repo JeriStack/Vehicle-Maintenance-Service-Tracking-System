@@ -1,0 +1,119 @@
+Type,ID,Parent_ID,Title,Epic,Requirements,Role,Priority,Release,Estimate_Points,Sprint,Owner,Status
+Epic,EP-AUTH,,Authentication and Account Security,EP-AUTH,AUTH-001 to AUTH-009,Shared,P0,MVP,25,Sprint 1,Lead Architect,IMPLEMENTED
+Story,US-AUTH-01,EP-AUTH,User Registration,EP-AUTH,AUTH-001;AUTH-004;AUTH-009,Guest,P0,MVP,5,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-01-BE,US-AUTH-01,Backend registration validation & bcrypt hashing,EP-AUTH,AUTH-001,Guest,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-01-FE,US-AUTH-01,Registration glassmorphism view,EP-AUTH,AUTH-001,Guest,P0,MVP,2,Sprint 1,Frontend Dev,IMPLEMENTED
+Task,TASK-AUTH-01-TEST,US-AUTH-01,Registration automated validation tests,EP-AUTH,AUTH-001,System,P0,MVP,1,Sprint 1,QA Lead,IMPLEMENTED
+Story,US-AUTH-02,EP-AUTH,Secure Login & Session Establishment,EP-AUTH,AUTH-002;AUTH-008,Guest,P0,MVP,5,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-02-BE,US-AUTH-02,Credential verification & session regeneration,EP-AUTH,AUTH-002,Guest,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-02-FE,US-AUTH-02,Login glassmorphism view & autofill styling,EP-AUTH,AUTH-002,Guest,P0,MVP,2,Sprint 1,Frontend Dev,IMPLEMENTED
+Task,TASK-AUTH-02-TEST,US-AUTH-02,Authentication state unit tests,EP-AUTH,AUTH-002,System,P0,MVP,1,Sprint 1,QA Lead,IMPLEMENTED
+Story,US-AUTH-03,EP-AUTH,User Logout & Session Invalidation,EP-AUTH,AUTH-003,Authenticated,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-03-BE,US-AUTH-03,Session destruction & remember token deletion,EP-AUTH,AUTH-003,Authenticated,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Story,US-AUTH-04,EP-AUTH,Remember-Me Persistent Login,EP-AUTH,AUTH-005,User / Admin,P0,MVP,5,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-04-DB,US-AUTH-04,Remember tokens table migration,EP-AUTH,AUTH-005,System,P0,MVP,1,Sprint 1,Database Eng,IMPLEMENTED
+Task,TASK-AUTH-04-BE,US-AUTH-04,Split-token validator generation & auto-login,EP-AUTH,AUTH-005,System,P0,MVP,3,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-04-TEST,US-AUTH-04,Remember-me cryptographic unit tests,EP-AUTH,AUTH-005,System,P0,MVP,1,Sprint 1,QA Lead,IMPLEMENTED
+Story,US-AUTH-05,EP-AUTH,Self-Service Password Reset,EP-AUTH,AUTH-006,Guest,P0,MVP,5,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-05-BE,US-AUTH-05,60-minute SHA-256 token reset action,EP-AUTH,AUTH-006,Guest,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-05-MAIL,US-AUTH-05,Native RFC 5321 socket mailer with log fallback,EP-AUTH,AUTH-006,System,P0,MVP,2,Sprint 1,Backend Dev,IMPLEMENTED
+Task,TASK-AUTH-05-TEST,US-AUTH-05,Password reset expiry unit tests,EP-AUTH,AUTH-006,System,P0,MVP,1,Sprint 1,QA Lead,IMPLEMENTED
+Story,US-AUTH-06,EP-AUTH,Role-Based Access Control Guards,EP-AUTH,AUTH-007,System,P0,MVP,3,Sprint 1,Lead Architect,IMPLEMENTED
+Task,TASK-AUTH-06-BE,US-AUTH-06,Centralized route guards in includes/auth.php,EP-AUTH,AUTH-007,System,P0,MVP,2,Sprint 1,Lead Architect,IMPLEMENTED
+Task,TASK-AUTH-06-TEST,US-AUTH-06,RBAC route unit tests,EP-AUTH,AUTH-007,System,P0,MVP,1,Sprint 1,QA Lead,IMPLEMENTED
+Epic,EP-VEH,,Vehicle Garage Management,EP-VEH,VEH-001 to VEH-007,Vehicle Owner,P0,MVP,14,Sprint 2,Backend Dev,IMPLEMENTED
+Story,US-VEH-01,EP-VEH,Register Personal Vehicle,EP-VEH,VEH-001;VEH-006,Vehicle Owner,P0,MVP,3,Sprint 2,Backend Dev,IMPLEMENTED
+Task,TASK-VEH-01-BE,US-VEH-01,Plate normalization & year range validation,EP-VEH,VEH-001,Vehicle Owner,P0,MVP,2,Sprint 2,Backend Dev,IMPLEMENTED
+Task,TASK-VEH-01-FE,US-VEH-01,Vehicle creation view & form styling,EP-VEH,VEH-001,Vehicle Owner,P0,MVP,1,Sprint 2,Frontend Dev,IMPLEMENTED
+Story,US-VEH-02,EP-VEH,View Personal Garage,EP-VEH,VEH-002;VEH-005,Vehicle Owner,P0,MVP,2,Sprint 2,Frontend Dev,IMPLEMENTED
+Task,TASK-VEH-02-FE,US-VEH-02,Garage grid view & search filtering,EP-VEH,VEH-002,Vehicle Owner,P0,MVP,1,Sprint 2,Frontend Dev,IMPLEMENTED
+Task,TASK-VEH-02-SEC,US-VEH-02,Owner-scoped query enforcement (IDOR guard),EP-VEH,VEH-005,System,P0,MVP,1,Sprint 2,Security Review,IMPLEMENTED
+Story,US-VEH-03,EP-VEH,Update Vehicle Information,EP-VEH,VEH-003,Vehicle Owner,P0,MVP,3,Sprint 2,Backend Dev,IMPLEMENTED
+Task,TASK-VEH-03-BE,US-VEH-03,Odometer non-regression validation,EP-VEH,VEH-003,Vehicle Owner,P0,MVP,2,Sprint 2,Backend Dev,IMPLEMENTED
+Task,TASK-VEH-03-FE,US-VEH-03,Vehicle edit form,EP-VEH,VEH-003,Vehicle Owner,P0,MVP,1,Sprint 2,Frontend Dev,IMPLEMENTED
+Story,US-VEH-04,EP-VEH,Archive Vehicle (Soft-Delete),EP-VEH,VEH-004,Vehicle Owner,P0,MVP,3,Sprint 2,Database Eng,PARTIALLY IMPLEMENTED
+Task,TASK-VEH-04-BE,US-VEH-04,Soft-delete status update in vehicle action,EP-VEH,VEH-004,Vehicle Owner,P0,MVP,2,Sprint 2,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-VEH-04-FE,US-VEH-04,Filter active vehicles list excluding archived,EP-VEH,VEH-004,Vehicle Owner,P0,MVP,1,Sprint 2,Frontend Dev,PARTIALLY IMPLEMENTED
+Story,US-VEH-05,EP-VEH,Odometer Audit History Log,EP-VEH,VEH-007,System,P1,Rel 1.1,3,Sprint 2,Database Eng,PARTIALLY IMPLEMENTED
+Task,TASK-VEH-05-DB,US-VEH-05,Vehicle mileage logs table migration,EP-VEH,VEH-007,System,P1,Rel 1.1,1,Sprint 2,Database Eng,IMPLEMENTED
+Task,TASK-VEH-05-BE,US-VEH-05,Insert mileage log entry on vehicle update,EP-VEH,VEH-007,System,P1,Rel 1.1,2,Sprint 2,Backend Dev,PARTIALLY IMPLEMENTED
+Epic,EP-SRV,,Service Records and Service History,EP-SRV,SRV-001 to SRV-007,Vehicle Owner,P0,MVP,14,Sprint 3,Backend Dev,IMPLEMENTED
+Story,US-SRV-01,EP-SRV,Log Completed Service Record,EP-SRV,SRV-001;SRV-005;SRV-006;SRV-007,Vehicle Owner,P0,MVP,5,Sprint 3,Backend Dev,IMPLEMENTED
+Task,TASK-SRV-01-BE,US-SRV-01,Transactional service create & monotonic odometer,EP-SRV,SRV-001,Vehicle Owner,P0,MVP,3,Sprint 3,Backend Dev,IMPLEMENTED
+Task,TASK-SRV-01-FE,US-SRV-01,Service entry form with cost & provider,EP-SRV,SRV-001,Vehicle Owner,P0,MVP,2,Sprint 3,Frontend Dev,IMPLEMENTED
+Story,US-SRV-02,EP-SRV,View Service History Log,EP-SRV,SRV-002,Vehicle Owner,P0,MVP,3,Sprint 3,Frontend Dev,IMPLEMENTED
+Task,TASK-SRV-02-FE,US-SRV-02,Chronological historical table with filters,EP-SRV,SRV-002,Vehicle Owner,P0,MVP,3,Sprint 3,Frontend Dev,IMPLEMENTED
+Story,US-SRV-03,EP-SRV,Edit Completed Service Record,EP-SRV,SRV-003,Vehicle Owner,P0,MVP,3,Sprint 3,Backend Dev,IMPLEMENTED
+Task,TASK-SRV-03-BE,US-SRV-03,Owner verification and update handler,EP-SRV,SRV-003,Vehicle Owner,P0,MVP,2,Sprint 3,Backend Dev,IMPLEMENTED
+Task,TASK-SRV-03-FE,US-SRV-03,Service edit form view,EP-SRV,SRV-003,Vehicle Owner,P0,MVP,1,Sprint 3,Frontend Dev,IMPLEMENTED
+Story,US-SRV-04,EP-SRV,Void Erroneous Service Record,EP-SRV,SRV-004,Vehicle Owner,P1,Rel 1.1,3,Sprint 3,Database Eng,NOT IMPLEMENTED
+Task,TASK-SRV-04-BE,US-SRV-04,Status voided update with mandatory reason,EP-SRV,SRV-004,Vehicle Owner,P1,Rel 1.1,2,Sprint 3,Backend Dev,NOT IMPLEMENTED
+Task,TASK-SRV-04-FE,US-SRV-04,Void modal dialog and exclusion from totals,EP-SRV,SRV-004,Vehicle Owner,P1,Rel 1.1,1,Sprint 3,Frontend Dev,NOT IMPLEMENTED
+Epic,EP-MTN,,Maintenance Tracking and Scheduling,EP-MTN,MTN-001 to MTN-006,Vehicle Owner,P0,MVP,16,Sprint 4,Lead Architect,IMPLEMENTED
+Story,US-MTN-01,EP-MTN,Dual-Criteria Maintenance Scheduling,EP-MTN,MTN-001,Vehicle Owner,P0,MVP,3,Sprint 4,Backend Dev,IMPLEMENTED
+Task,TASK-MTN-01-BE,US-MTN-01,Trigger validation ensuring date or km provided,EP-MTN,MTN-001,Vehicle Owner,P0,MVP,3,Sprint 4,Backend Dev,IMPLEMENTED
+Story,US-MTN-02,EP-MTN,Dynamic Status Calculation Engine,EP-MTN,MTN-002,System,P0,MVP,5,Sprint 4,Lead Architect,IMPLEMENTED
+Task,TASK-MTN-02-CORE,US-MTN-02,MaintenanceCalculator domain service logic,EP-MTN,MTN-002,System,P0,MVP,3,Sprint 4,Lead Architect,IMPLEMENTED
+Task,TASK-MTN-02-TEST,US-MTN-02,8/8 status calculation unit test vectors,EP-MTN,MTN-002,System,P0,MVP,2,Sprint 4,QA Lead,IMPLEMENTED
+Story,US-MTN-03,EP-MTN,Dedicated Status Monitoring Views,EP-MTN,MTN-003;MTN-004;MTN-005,Vehicle Owner,P0,MVP,3,Sprint 4,Frontend Dev,IMPLEMENTED
+Task,TASK-MTN-03-FE,US-MTN-03,Upcoming due and overdue status badge views,EP-MTN,MTN-003,Vehicle Owner,P0,MVP,3,Sprint 4,Frontend Dev,IMPLEMENTED
+Story,US-MTN-04,EP-MTN,Dedicated Maintenance Schedules Entity,EP-MTN,MTN-006,System,P1,Rel 1.1,5,Sprint 4,Database Eng,PARTIALLY IMPLEMENTED
+Task,TASK-MTN-04-DB,US-MTN-04,Maintenance schedules table migration,EP-MTN,MTN-006,System,P1,Rel 1.1,2,Sprint 4,Database Eng,IMPLEMENTED
+Task,TASK-MTN-04-BE,US-MTN-04,Decouple future schedule CRUD from service records,EP-MTN,MTN-006,System,P1,Rel 1.1,3,Sprint 4,Backend Dev,PARTIALLY IMPLEMENTED
+Epic,EP-NTF,,Notifications and Reminders,EP-NTF,NTF-001 to NTF-007,Shared,P0,MVP,22,Sprint 5,Backend Dev,IMPLEMENTED
+Story,US-NTF-01,EP-NTF,In-App Notification Center,EP-NTF,NTF-001;NTF-006,Vehicle Owner,P0,MVP,3,Sprint 5,Frontend Dev,IMPLEMENTED
+Task,TASK-NTF-01-FE,US-NTF-01,Notification inbox & mark-read AJAX actions,EP-NTF,NTF-001,Vehicle Owner,P0,MVP,3,Sprint 5,Frontend Dev,IMPLEMENTED
+Story,US-NTF-02,EP-NTF,Automated Reminders Processor,EP-NTF,NTF-002;NTF-003,System,P0,MVP,5,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-NTF-02-CLI,US-NTF-02,Headless reminder runner with flock locking,EP-NTF,NTF-002,System,P0,MVP,5,Sprint 5,Backend Dev,IMPLEMENTED
+Story,US-NTF-03,EP-NTF,Idempotent Reminder Deduplication,EP-NTF,NTF-004,System,P0,MVP,3,Sprint 5,Database Eng,IMPLEMENTED
+Task,TASK-NTF-03-DB,US-NTF-03,Deterministic dedupe key & 7-day suppression,EP-NTF,NTF-004,System,P0,MVP,3,Sprint 5,Database Eng,IMPLEMENTED
+Story,US-NTF-04,EP-NTF,Real-Time WebSocket Alerts,EP-NTF,NTF-005,User / Admin,P0,MVP,8,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-NTF-04-WS,US-NTF-04,Native RFC 6455 socket server & broadcaster,EP-NTF,NTF-005,System,P0,MVP,4,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-NTF-04-JS,US-NTF-04,Client notification engine with audio chime,EP-NTF,NTF-005,Shared,P0,MVP,3,Sprint 5,Frontend Dev,IMPLEMENTED
+Task,TASK-NTF-04-TEST,US-NTF-04,WebSocket framing RFC 6455 unit tests,EP-NTF,NTF-005,System,P0,MVP,1,Sprint 5,QA Lead,IMPLEMENTED
+Story,US-NTF-05,EP-NTF,Automated SMTP Email Alerting,EP-NTF,NTF-007,System,P1,Rel 1.1,3,Sprint 5,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-NTF-05-MAIL,US-NTF-05,Hook MailHelper into reminder processor,EP-NTF,NTF-007,System,P1,Rel 1.1,3,Sprint 5,Backend Dev,PARTIALLY IMPLEMENTED
+Epic,EP-DASH,,Dashboards and Statistics,EP-DASH,DASH-001 to DASH-004,Shared,P0,MVP,9,Sprint 6,Frontend Dev,IMPLEMENTED
+Story,US-DASH-01,EP-DASH,Vehicle Owner Personal Dashboard,EP-DASH,DASH-001;DASH-003,Vehicle Owner,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Task,TASK-DASH-01-FE,US-DASH-01,Metric cards & shortcuts on owner dashboard,EP-DASH,DASH-001,Vehicle Owner,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Story,US-DASH-02,EP-DASH,Real-Time Status Counters,EP-DASH,DASH-002,Vehicle Owner,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Task,TASK-DASH-02-JS,US-DASH-02,Live DOM counter updates on WebSocket events,EP-DASH,DASH-002,Vehicle Owner,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Story,US-DASH-03,EP-DASH,Administrator Platform Dashboard,EP-DASH,DASH-004,Admin,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Task,TASK-DASH-03-FE,US-DASH-03,Platform health metric cards on admin dashboard,EP-DASH,DASH-004,Admin,P0,MVP,3,Sprint 6,Frontend Dev,IMPLEMENTED
+Epic,EP-RPT,,Reports and Analytics,EP-RPT,RPT-001 to RPT-005,Vehicle Owner,P0,MVP,14,Sprint 7,Frontend Dev,IMPLEMENTED
+Story,US-RPT-01,EP-RPT,Vehicle Maintenance Summary Report,EP-RPT,RPT-001;RPT-004,Vehicle Owner,P0,MVP,3,Sprint 7,Backend Dev,IMPLEMENTED
+Task,TASK-RPT-01-BE,US-RPT-01,Summary aggregation query per vehicle,EP-RPT,RPT-001,Vehicle Owner,P0,MVP,3,Sprint 7,Backend Dev,IMPLEMENTED
+Story,US-RPT-02,EP-RPT,Chronological Service Log,EP-RPT,RPT-002,Vehicle Owner,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Task,TASK-RPT-02-FE,US-RPT-02,Full-width filterable historical log view,EP-RPT,RPT-002,Vehicle Owner,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Story,US-RPT-03,EP-RPT,Monthly & Yearly Cost Analytics,EP-RPT,RPT-003,Vehicle Owner,P0,MVP,5,Sprint 7,Frontend Dev,IMPLEMENTED
+Task,TASK-RPT-03-FE,US-RPT-03,Chart.js visual expense breakdown charts,EP-RPT,RPT-003,Vehicle Owner,P0,MVP,5,Sprint 7,Frontend Dev,IMPLEMENTED
+Story,US-RPT-04,EP-RPT,RFC 4180 CSV Data Export,EP-RPT,RPT-005,Vehicle Owner,P1,Rel 1.1,3,Sprint 7,Backend Dev,IMPLEMENTED
+Task,TASK-RPT-04-BE,US-RPT-04,CSV export streaming with fputcsv in reports,EP-RPT,RPT-005,Vehicle Owner,P1,Rel 1.1,3,Sprint 7,Backend Dev,IMPLEMENTED
+Epic,EP-SET,,Settings and Preferences,EP-SET,SET-001 to SET-004,Shared,P0,MVP,10,Sprint 5,Backend Dev,IMPLEMENTED
+Story,US-SET-01,EP-SET,User Profile Management,EP-SET,SET-001,User / Admin,P0,MVP,2,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-SET-01-BE,US-SET-01,Profile update handler & audit logging,EP-SET,SET-001,User / Admin,P0,MVP,2,Sprint 5,Backend Dev,IMPLEMENTED
+Story,US-SET-02,EP-SET,Account Password Change,EP-SET,SET-002,User / Admin,P0,MVP,3,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-SET-02-BE,US-SET-02,Current password check & re-hashing,EP-SET,SET-002,User / Admin,P0,MVP,3,Sprint 5,Backend Dev,IMPLEMENTED
+Story,US-SET-03,EP-SET,Notification Preferences Configuration,EP-SET,SET-003,Vehicle Owner,P0,MVP,3,Sprint 5,Backend Dev,IMPLEMENTED
+Task,TASK-SET-03-FE,US-SET-03,Toggles & reminder lead-days input view,EP-SET,SET-003,Vehicle Owner,P0,MVP,3,Sprint 5,Frontend Dev,IMPLEMENTED
+Story,US-SET-04,EP-SET,Default Vehicle Servicing Defaults,EP-SET,SET-004,Vehicle Owner,P1,Rel 1.1,2,Sprint 5,Database Eng,IMPLEMENTED
+Task,TASK-SET-04-BE,US-SET-04,Default service intervals in vehicle_preferences,EP-SET,SET-004,Vehicle Owner,P1,Rel 1.1,2,Sprint 5,Database Eng,IMPLEMENTED
+Epic,EP-ADM,,System Administration,EP-ADM,ADM-001 to ADM-008,System Admin,P0,MVP,29,Sprint 7,Security Review,PARTIALLY IMPLEMENTED
+Story,US-ADM-01,EP-ADM,User Account Directory & Search,EP-ADM,ADM-001,Admin,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Task,TASK-ADM-01-FE,US-ADM-01,User directory table with search filtering,EP-ADM,ADM-001,Admin,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Story,US-ADM-02,EP-ADM,Account Activation / Deactivation,EP-ADM,ADM-002,Admin,P0,MVP,3,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-02-BE,US-ADM-02,Status toggle POST handler & audit logging,EP-ADM,ADM-002,Admin,P0,MVP,2,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-02-FE,US-ADM-02,Activate/Deactivate action button on user view,EP-ADM,ADM-002,Admin,P0,MVP,1,Sprint 7,Frontend Dev,PARTIALLY IMPLEMENTED
+Story,US-ADM-03,EP-ADM,Role Management with Last-Admin Protection,EP-ADM,ADM-003;ADM-004,Admin,P0,MVP,5,Sprint 7,Security Review,IMPLEMENTED
+Task,TASK-ADM-03-BE,US-ADM-03,Role update handler with last-admin guard,EP-ADM,ADM-003,Admin,P0,MVP,3,Sprint 7,Backend Dev,IMPLEMENTED
+Task,TASK-ADM-03-TEST,US-ADM-03,Automated last-admin protection unit tests,EP-ADM,ADM-004,System,P0,MVP,2,Sprint 7,QA Lead,IMPLEMENTED
+Story,US-ADM-04,EP-ADM,Global Maintenance Service Type Catalog,EP-ADM,ADM-005,Admin,P1,Rel 1.1,5,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-04-FE,US-ADM-04,Catalog management UI in admin/maintenance_types.php,EP-ADM,ADM-005,Admin,P1,Rel 1.1,3,Sprint 7,Frontend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-04-BE,US-ADM-04,CRUD actions for global maintenance_types,EP-ADM,ADM-005,Admin,P1,Rel 1.1,2,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+Story,US-ADM-05,EP-ADM,Security Audit Log Viewer,EP-ADM,ADM-006,Admin,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Task,TASK-ADM-05-FE,US-ADM-05,Filterable audit log table with timestamps,EP-ADM,ADM-006,Admin,P0,MVP,3,Sprint 7,Frontend Dev,IMPLEMENTED
+Story,US-ADM-06,EP-ADM,Owner Privacy Boundary Enforcement,EP-ADM,ADM-007,System,P0,MVP,5,Sprint 7,Lead Architect,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-06-BE,US-ADM-06,Refactor admin views to restrict private records,EP-ADM,ADM-007,System,P0,MVP,5,Sprint 7,Lead Architect,PARTIALLY IMPLEMENTED
+Story,US-ADM-07,EP-ADM,System-Wide Configuration Management,EP-ADM,ADM-008,Admin,P1,Rel 1.1,3,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+Task,TASK-ADM-07-FE,US-ADM-07,System settings view in admin/settings.php,EP-ADM,ADM-008,Admin,P1,Rel 1.1,3,Sprint 7,Backend Dev,PARTIALLY IMPLEMENTED
+

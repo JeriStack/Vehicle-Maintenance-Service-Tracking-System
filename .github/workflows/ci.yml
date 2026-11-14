@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   php-lint:
     name: PHP ${{ matrix.php-version }} syntax
@@ -26,10 +30,10 @@ jobs:
           php-version: ${{ matrix.php-version }}
 
       - name: Lint PHP files
-        run: find . -type f -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n 1 php -l
+        run: find . -type f -name '*.php' -not -path './.git/*' -not -path './vendor/*' -print0 | xargs -0 -n 1 php -l
 
   database-schema:
-    name: Validate MySQL schema
+    name: Validate MySQL schema & DB tests
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -47,11 +51,26 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo, pdo_mysql, mbstring
+
       - name: Import database schema
         run: mysql --host=127.0.0.1 --user=root --password=root < database/schema.sql
 
+      - name: Run Database Integration Tests
+        env:
+          APP_ENV: testing
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: root
+        run: php tests/run_tests.php --database
+
   unit-tests:
-    name: PHP ${{ matrix.php-version }} Unit Tests
+    name: PHP ${{ matrix.php-version }} Unit & Smoke Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -65,6 +84,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
+          extensions: pdo, pdo_mysql, mbstring, openssl, json, session
 
-      - name: Run Unit Tests
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-publish
+
+      - name: Run Unit and Smoke Tests
+        env:
+          APP_ENV: testing
         run: php tests/run_tests.php

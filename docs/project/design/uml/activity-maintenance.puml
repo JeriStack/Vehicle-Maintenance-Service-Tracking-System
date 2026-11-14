@@ -1,0 +1,76 @@
+@startuml activity-maintenance
+skinparam shadowing false
+skinparam monochrome false
+
+title Maintenance Status Calculation ("Whichever Comes First") Activity
+
+start
+
+:Receive Schedule Record;
+note right
+  Inputs:
+  - Target Date (optional)
+  - Target Mileage (optional)
+  - Current Vehicle Odometer
+  - Reminder Lead Window (days)
+  - Current Date (Asia/Manila)
+end note
+
+if (Schedule is Active?) then (no)
+  :Return Status = 'INACTIVE';
+  stop
+endif
+
+fork
+  ' Date Threshold Evaluation
+  if (Target Date is Present?) then (yes)
+    if (Target Date < Current Date?) then (yes)
+      :Date Status = 'OVERDUE';
+    else if (Target Date == Current Date?) then (yes)
+      :Date Status = 'DUE';
+    else if (Target Date <= Current Date + Lead Window?) then (yes)
+      :Date Status = 'UPCOMING';
+    else (future)
+      :Date Status = 'NOT_DUE';
+    endif
+  else (no date)
+    :Date Status = null;
+  endif
+fork again
+  ' Mileage Threshold Evaluation
+  if (Target Mileage is Present?) then (yes)
+    if (Current Mileage > Target Mileage?) then (yes)
+      :Mileage Status = 'OVERDUE';
+    else if (Current Mileage == Target Mileage?) then (yes)
+      :Mileage Status = 'DUE';
+    else if (Current Mileage >= Target Mileage - 1000 km?) then (yes)
+      :Mileage Status = 'UPCOMING';
+    else (distance ahead)
+      :Mileage Status = 'NOT_DUE';
+    endif
+  else (no mileage)
+    :Mileage Status = null;
+  endif
+end fork
+
+' Precedence Evaluation
+if (Date Status == 'OVERDUE' OR Mileage Status == 'OVERDUE') then (yes)
+  :Final Status = 'OVERDUE';
+  :Priority Weight = 1 (Highest);
+else if (Date Status == 'DUE' OR Mileage Status == 'DUE') then (yes)
+  :Final Status = 'DUE';
+  :Priority Weight = 2;
+else if (Date Status == 'UPCOMING' OR Mileage Status == 'UPCOMING') then (yes)
+  :Final Status = 'UPCOMING';
+  :Priority Weight = 3;
+else (outside all windows)
+  :Final Status = 'NOT_DUE';
+  :Priority Weight = 4;
+endif
+
+:Calculate Remaining Days & Remaining Km;
+:Return Calculation Result Object;
+
+stop
+@enduml
+

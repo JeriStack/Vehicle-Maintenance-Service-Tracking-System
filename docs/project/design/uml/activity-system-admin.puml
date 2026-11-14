@@ -1,0 +1,68 @@
+@startuml activity-system-admin
+skinparam shadowing false
+skinparam monochrome false
+
+title System Administrator Operations Activity
+
+start
+
+:Administrator logs in via /auth/login.php;
+:requireAdmin() validates $_SESSION['role'] == 'admin';
+
+if (Is Admin?) then (no)
+  :Return HTTP 403 Forbidden;
+  :Redirect to User Dashboard;
+  stop
+else (yes)
+  :Display Administrator Dashboard (/admin/dashboard.php);
+  :Show Platform Metrics (Total Users, Vehicles, Services, Logs);
+endif
+
+switch (Select Admin Action?)
+case (User Management)
+  :Navigate to /admin/users.php;
+  :Search Users by Name or Email;
+  :Select User Account (/admin/user_view.php);
+  
+  if (Toggle Status?) then (yes)
+    :Update User Status ('active' <-> 'inactive');
+    :Log Status Change to audit_logs;
+  else if (Change Role?) then (yes)
+    if (Target User == Current User?) then (yes)
+      :Block Self-Demotion;
+      :Display "Cannot change your own role" Alert;
+    else if (Demoting Admin && Total Active Admins <= 1?) then (yes)
+      :Block Last-Admin Demotion;
+      :Display "Cannot demote last administrator" Alert;
+    else (valid)
+      :Update Role ('user' <-> 'admin');
+      :Record Role Change in audit_logs;
+      :Display Success Alert;
+    endif
+  endif
+
+case (Global Service Types)
+  :Navigate to /admin/maintenance_types.php;
+  :View Global Service Catalog;
+  if (Add/Edit Type?) then (yes)
+    :Input Service Name, Default Days, Default Km;
+    :Save to maintenance_types table;
+    :Log Mutation in audit_logs;
+  else if (Deactivate Type?) then (yes)
+    :Set is_active = 0 (Preserve Historical Records);
+  endif
+
+case (Audit Logs)
+  :Navigate to /admin/audit_logs.php;
+  :Query audit_logs with Actor, Action, Table, Date;
+  :Display Immutable Historical Activity Feed;
+
+case (Privacy Boundary Check)
+  :Admin attempts direct URL to /vehicles/view.php;
+  :requireUser() blocks admin;
+  :Display "Access Denied: Private Owner Resource";
+endswitch
+
+stop
+@enduml
+

@@ -1,0 +1,108 @@
+@startuml component-architecture
+skinparam componentStyle uml2
+skinparam shadowing false
+skinparam monochrome false
+
+title Vehicle Maintenance Service Tracking System (VMS) - Component Architecture
+
+package "Client Layer (Browser)" {
+  [Responsive UI (Bootstrap 5)] as UI
+  [Chart.js Visual Analytics] as Charts
+  [WebSocket Client (notifications.js)] as WSClient
+}
+
+package "Presentation & Action Layer (PHP 8+)" {
+  [Auth Controllers (/auth/*)] as AuthCtrl
+  [Vehicle Action Handlers (/actions/vehicle_action.php)] as VehAction
+  [Service Action Handlers (/actions/service_action.php)] as SrvAction
+  [Admin Controllers (/admin/*)] as AdminCtrl
+  [Settings Handlers (/actions/settings_action.php)] as SetAction
+  [Report Viewers (/reports/*)] as RptViews
+}
+
+package "Security & Guard Layer" {
+  [Centralized RBAC Guards (includes/auth.php)] as RBAC
+  [Session Manager & Fixation Defense] as SessionGuard
+  [CSRF Token Validator] as CSRF
+  [Input Sanitizer & Output Escaper] as Sanitizer
+}
+
+package "Domain & Helper Services" {
+  [MaintenanceCalculator (helpers/maintenance_calculator.php)] as CalcService
+  [NotificationHelper (helpers/notification_helper.php)] as NotifHelper
+  [WebSocketHelper (helpers/websocket_helper.php)] as WSHelper
+  [MailHelper (helpers/mail_helper.php)] as MailHelper
+  [ReportHelper (helpers/report_helper.php)] as RptHelper
+}
+
+package "Background Execution Layer" {
+  [CLI Reminder Runner (bin/process_reminders.php)] as CliRunner
+  [RFC 6455 Socket Daemon (websocket/server.php)] as WSDaemon
+  [Cron / Windows Task Scheduler] as Scheduler
+}
+
+package "Persistence & Storage Layer" {
+  [Database Access (PDO Singleton)] as PDO
+  database "MySQL / MariaDB (InnoDB)" as DB {
+    [users & remember_tokens]
+    [vehicles & mileage_logs]
+    [service_records]
+    [maintenance_schedules]
+    [maintenance_types]
+    [notifications & settings]
+    [realtime_events]
+    [audit_logs]
+  }
+  folder "Local Filesystem" as FS {
+    [logs/app.log]
+    [logs/mail.log]
+    [uploads/vehicle_documents/]
+  }
+}
+
+' Client to Presentation
+UI --> AuthCtrl : HTTP POST/GET
+UI --> VehAction : Form Submit
+UI --> SrvAction : Form Submit
+UI --> AdminCtrl : Admin Navigation
+UI --> RptViews : View Requests
+Charts <-- RptViews : Cost Datasets
+WSClient <--> WSDaemon : WS Protocol (Port 8080)
+
+' Action to Guards
+AuthCtrl --> SessionGuard
+AuthCtrl --> CSRF
+VehAction --> RBAC : requireUser()
+VehAction --> CSRF
+SrvAction --> RBAC : requireUser()
+AdminCtrl --> RBAC : requireAdmin()
+
+' Actions to Domain Helpers
+VehAction --> WSHelper : vehicleUpdated()
+SrvAction --> CalcService : calculateStatus()
+SrvAction --> WSHelper : serviceUpdated()
+AuthCtrl --> MailHelper : sendPasswordReset()
+RptViews --> RptHelper : calculatePercentage()
+
+' Background Daemon
+Scheduler --> CliRunner : CLI Execution
+CliRunner --> NotifHelper : generateReminders()
+NotifHelper --> CalcService : calculateStatus()
+NotifHelper --> WSHelper : notifyUser()
+WSHelper --> WSDaemon : TCP Socket Broadcast (127.0.0.1:8080)
+WSHelper --> DB : Queue in realtime_events
+WSDaemon --> DB : Poll realtime_events queue
+
+' Domain to Persistence
+AuthCtrl --> PDO
+VehAction --> PDO
+SrvAction --> PDO
+AdminCtrl --> PDO
+NotifHelper --> PDO
+CliRunner --> PDO
+PDO --> DB : Parameterized Prepared SQL
+AuthCtrl --> FS : Write logs
+MailHelper --> FS : Write mail.log
+
+@enduml
+
