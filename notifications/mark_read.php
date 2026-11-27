@@ -18,12 +18,12 @@ try {
     $pdo = Database::getInstance();
     
     if ($id === 'all') {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0");
         $stmt->execute([$userId]);
         $_SESSION['flash_success'] = "All notifications marked as read.";
         WebSocketHelper::notificationRead($userId, 'all');
     } elseif (is_numeric($id)) {
-        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $userId]);
         WebSocketHelper::notificationRead($userId, (int)$id);
     }
