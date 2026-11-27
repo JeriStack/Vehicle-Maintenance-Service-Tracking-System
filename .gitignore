@@ -77,7 +77,10 @@ Testing/
 .env.*
 !.env.example
 
-# Application Storage
+# Application Storage & Legacy Logs
+/logs/*
+!/logs/.gitkeep
+!/logs/.htaccess
 /storage/logs/*
 !/storage/logs/.gitkeep
 /storage/sessions/*

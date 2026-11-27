@@ -1,14 +1,26 @@
 # Disable directory browsing
 Options -Indexes
 
-# Protect sensitive files
+# Protect dotfiles (.env, .git, .htaccess, etc.)
 <FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
-<FilesMatch "\.(ini|log|sql|json|md)$">
-    Order allow,deny
-    Deny from all
+
+# Protect non-public configuration, metadata, log, script, and SQL files
+<FilesMatch "\.(ini|log|sql|json|lock|md|sh|bat|bak|puml|xml|yml|yaml|dist|env|txt)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # Security Headers (if mod_headers is enabled)
