@@ -67,6 +67,75 @@ document.addEventListener('DOMContentLoaded', event => {
         });
     });
 
+    // Light / Dark Mode Toggle (2-state system-aware override via <meta name="color-scheme">)
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const colorSchemeMeta = document.querySelector('meta[name="color-scheme"]');
+    const systemDarkMedia = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    let inMemoryScheme = null;
+
+    const readStoredScheme = () => {
+        try {
+            const val = localStorage.getItem('color-scheme');
+            return (val === 'light' || val === 'dark') ? val : null;
+        } catch (e) {
+            return inMemoryScheme;
+        }
+    };
+
+    const getSystemScheme = () => (systemDarkMedia && systemDarkMedia.matches) ? 'dark' : 'light';
+
+    const applyColorScheme = (storedScheme) => {
+        const metaValue = storedScheme ?? 'light dark';
+        if (colorSchemeMeta) {
+            colorSchemeMeta.content = metaValue;
+        }
+        const resolved = storedScheme ?? getSystemScheme();
+        document.documentElement.setAttribute('data-bs-theme', resolved);
+    };
+
+    applyColorScheme(readStoredScheme());
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const systemScheme = getSystemScheme();
+            const currentRendered = readStoredScheme() ?? systemScheme;
+            const targetScheme = currentRendered === 'dark' ? 'light' : 'dark';
+
+            if (targetScheme !== systemScheme) {
+                inMemoryScheme = targetScheme;
+                try { localStorage.setItem('color-scheme', targetScheme); } catch (e) {}
+                applyColorScheme(targetScheme);
+            } else {
+                // Returning to system preference: remove stored override rather than pinning
+                inMemoryScheme = null;
+                try { localStorage.removeItem('color-scheme'); } catch (e) {}
+                applyColorScheme(null);
+            }
+        });
+    }
+
+    // Keep in sync across browser tabs
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'color-scheme') {
+            const val = (e.newValue === 'light' || e.newValue === 'dark') ? e.newValue : null;
+            inMemoryScheme = val;
+            applyColorScheme(val);
+        }
+    });
+
+    // React to OS theme changes without clearing an explicit stored override
+    if (systemDarkMedia) {
+        const onSystemChange = () => {
+            const stored = readStoredScheme();
+            if (!stored) {
+                applyColorScheme(null);
+            }
+        };
+        if (typeof systemDarkMedia.addEventListener === 'function') {
+            systemDarkMedia.addEventListener('change', onSystemChange);
+        }
+    }
+
     // Auto-dismiss alerts after 5 seconds
     const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
     alerts.forEach(alert => {

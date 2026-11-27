@@ -13,10 +13,24 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
         
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center">
+            <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center gap-2">
+                <!-- Light / Dark Mode Toggle -->
+                <li class="nav-item">
+                    <button type="button" class="nav-link vms-theme-toggle border-0 bg-transparent d-inline-flex align-items-center justify-content-center" id="themeToggleBtn">
+                        <span class="theme-option-dark">
+                            <i class="bi bi-moon-stars fs-5" aria-hidden="true"></i>
+                            <span class="visually-hidden">Switch to dark theme</span>
+                        </span>
+                        <span class="theme-option-light">
+                            <i class="bi bi-sun fs-5" aria-hidden="true"></i>
+                            <span class="visually-hidden">Switch to light theme</span>
+                        </span>
+                    </button>
+                </li>
+
                 <!-- Notifications -->
-                <li class="nav-item dropdown me-3">
-                    <a class="nav-link text-dark position-relative" href="#" id="navbarDropdownNotif" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <li class="nav-item dropdown">
+                    <a class="nav-link text-dark position-relative" href="#" id="navbarDropdownNotif" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">
                         <i class="bi bi-bell fs-5"></i>
                         <span id="notifBadge" class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle <?php echo (isset($unreadCount) && $unreadCount > 0) ? '' : 'd-none'; ?>">
                             <span class="visually-hidden">New alerts</span>
@@ -59,18 +73,18 @@
                     </div>
                 </li>
                 
-                <!-- User Profile -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" id="navbarDropdownUser" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                <!-- User Profile (Avatar Only) -->
+                <li class="nav-item dropdown ms-1">
+                    <a class="nav-link d-flex align-items-center p-0" id="navbarDropdownUser" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="Account menu for <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>" title="<?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>">
+                        <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-semibold" style="width: 36px; height: 36px;">
                             <?php echo strtoupper(substr($_SESSION['user_name'] ?? 'U', 0, 1)); ?>
-                        </div>
-                        <div class="d-none d-md-flex flex-column align-items-start lh-1">
-                            <span class="text-dark fw-medium"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></span>
-                            <small class="text-muted" style="font-size: 0.75rem;"><?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'Administrator' : 'Vehicle Owner'; ?></small>
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="navbarDropdownUser">
+                        <div class="dropdown-header border-bottom py-2">
+                            <div class="fw-semibold text-dark"><?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?></div>
+                            <small class="text-muted"><?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') ? 'Administrator' : 'Vehicle Owner'; ?></small>
+                        </div>
                         <a class="dropdown-item py-2" href="<?php echo BASE_URL; ?>settings/profile.php"><i class="bi bi-person me-2 text-muted"></i> Profile</a>
                         <a class="dropdown-item py-2" href="<?php echo BASE_URL; ?>settings/password.php"><i class="bi bi-key me-2 text-muted"></i> Change Password</a>
                         <div class="dropdown-divider"></div>

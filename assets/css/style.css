@@ -2,12 +2,105 @@
 :root {
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 80px;
+
+    /* Raw light & dark color tokens */
+    --vms-bg-light: #f8f9fa;
+    --vms-bg-dark: #0f172a;
+    --vms-surface-light: #ffffff;
+    --vms-surface-dark: #1e293b;
+    --vms-surface-subtle-light: #f1f5f9;
+    --vms-surface-subtle-dark: #263449;
+    --vms-border-light: #e2e8f0;
+    --vms-border-dark: #334155;
+    --vms-text-light: #0f172a;
+    --vms-text-dark: #f1f5f9;
+    --vms-muted-light: #64748b;
+    --vms-muted-dark: #94a3b8;
+    --vms-accent-light: #0ea5e9;
+    --vms-accent-dark: #38bdf8;
+    --vms-scrollbar-track-light: #e2e8f0;
+    --vms-scrollbar-track-dark: #0f172a;
+    --vms-scrollbar-thumb-light: #94a3b8;
+    --vms-scrollbar-thumb-dark: #475569;
+
+    /* Default (light) fallback tokens */
+    --vms-bg: var(--vms-bg-light);
+    --vms-surface: var(--vms-surface-light);
+    --vms-surface-subtle: var(--vms-surface-subtle-light);
+    --vms-border: var(--vms-border-light);
+    --vms-text: var(--vms-text-light);
+    --vms-muted: var(--vms-muted-light);
+    --vms-accent: var(--vms-accent-light);
+    --vms-scrollbar-track: var(--vms-scrollbar-track-light);
+    --vms-scrollbar-thumb: var(--vms-scrollbar-thumb-light);
+
+    /* Mandatory base: follow system preference unless overridden via <meta name="color-scheme"> */
+    color-scheme: light dark;
+    accent-color: var(--vms-accent);
+    scrollbar-color: var(--vms-scrollbar-thumb) var(--vms-scrollbar-track);
+}
+
+/* Fallback for browsers without light-dark() support */
+@media (prefers-color-scheme: dark) {
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+        --vms-bg: var(--vms-bg-dark);
+        --vms-surface: var(--vms-surface-dark);
+        --vms-surface-subtle: var(--vms-surface-subtle-dark);
+        --vms-border: var(--vms-border-dark);
+        --vms-text: var(--vms-text-dark);
+        --vms-muted: var(--vms-muted-dark);
+        --vms-accent: var(--vms-accent-dark);
+        --vms-scrollbar-track: var(--vms-scrollbar-track-dark);
+        --vms-scrollbar-thumb: var(--vms-scrollbar-thumb-dark);
+    }
+}
+
+/* Reflect <meta name="color-scheme"> manual overrides back to CSS color-scheme */
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+    --vms-bg: var(--vms-bg-dark);
+    --vms-surface: var(--vms-surface-dark);
+    --vms-surface-subtle: var(--vms-surface-subtle-dark);
+    --vms-border: var(--vms-border-dark);
+    --vms-text: var(--vms-text-dark);
+    --vms-muted: var(--vms-muted-dark);
+    --vms-accent: var(--vms-accent-dark);
+    --vms-scrollbar-track: var(--vms-scrollbar-track-dark);
+    --vms-scrollbar-thumb: var(--vms-scrollbar-thumb-dark);
+}
+
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+    color-scheme: light;
+    --vms-bg: var(--vms-bg-light);
+    --vms-surface: var(--vms-surface-light);
+    --vms-surface-subtle: var(--vms-surface-subtle-light);
+    --vms-border: var(--vms-border-light);
+    --vms-text: var(--vms-text-light);
+    --vms-muted: var(--vms-muted-light);
+    --vms-accent: var(--vms-accent-light);
+    --vms-scrollbar-track: var(--vms-scrollbar-track-light);
+    --vms-scrollbar-thumb: var(--vms-scrollbar-thumb-light);
+}
+
+@supports (color: light-dark(white, black)) {
+    :root {
+        --vms-bg: light-dark(var(--vms-bg-light), var(--vms-bg-dark));
+        --vms-surface: light-dark(var(--vms-surface-light), var(--vms-surface-dark));
+        --vms-surface-subtle: light-dark(var(--vms-surface-subtle-light), var(--vms-surface-subtle-dark));
+        --vms-border: light-dark(var(--vms-border-light), var(--vms-border-dark));
+        --vms-text: light-dark(var(--vms-text-light), var(--vms-text-dark));
+        --vms-muted: light-dark(var(--vms-muted-light), var(--vms-muted-dark));
+        --vms-accent: light-dark(var(--vms-accent-light), var(--vms-accent-dark));
+        --vms-scrollbar-track: light-dark(var(--vms-scrollbar-track-light), var(--vms-scrollbar-track-dark));
+        --vms-scrollbar-thumb: light-dark(var(--vms-scrollbar-thumb-light), var(--vms-scrollbar-thumb-dark));
+    }
 }
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     overflow-x: hidden;
-    background-color: #f8f9fa;
+    background-color: var(--vms-bg);
+    color: var(--vms-text);
 }
 
 /* Sidebar Wrapper */
@@ -379,4 +472,135 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     caret-color: #ffffff;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Navbar Theme Toggle & Non-Color Icon Branching */
+.vms-theme-toggle {
+    color: var(--vms-text);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.vms-theme-toggle:hover,
+.vms-theme-toggle:focus-visible {
+    background-color: var(--vms-surface-subtle) !important;
+    color: var(--vms-accent);
+    outline: none;
+}
+
+/* Default (Light): show moon ("Switch to dark"), hide sun */
+.vms-theme-toggle .theme-option-light {
+    display: none;
+}
+.vms-theme-toggle .theme-option-dark {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Dark (system preference when not pinned light, or pinned dark): show sun ("Switch to light") */
+@media (prefers-color-scheme: dark) {
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-dark {
+        display: none;
+    }
+    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-light {
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .vms-theme-toggle .theme-option-dark {
+    display: none;
+}
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .vms-theme-toggle .theme-option-light {
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Theme-Aware Application Surfaces (Light & Dark via CSS Tokens) */
+body:not(.auth-page).bg-light {
+    background-color: var(--vms-bg) !important;
+    color: var(--vms-text);
+}
+
+body:not(.auth-page) .navbar.bg-white,
+body:not(.auth-page) footer.bg-white,
+body:not(.auth-page) .card,
+body:not(.auth-page) .card-header.bg-white,
+body:not(.auth-page) .card-footer.bg-white,
+body:not(.auth-page) .dropdown-menu,
+body:not(.auth-page) .modal-content {
+    background-color: var(--vms-surface) !important;
+    color: var(--vms-text);
+    border-color: var(--vms-border) !important;
+}
+
+body:not(.auth-page) .bg-white {
+    background-color: var(--vms-surface) !important;
+}
+
+body:not(.auth-page) .bg-light,
+body:not(.auth-page) .table-light,
+body:not(.auth-page) .table-light > th,
+body:not(.auth-page) .table-light > td,
+body:not(.auth-page) .modal-header.bg-light,
+body:not(.auth-page) .modal-footer.bg-light,
+body:not(.auth-page) .input-group-text {
+    background-color: var(--vms-surface-subtle) !important;
+    color: var(--vms-text) !important;
+    border-color: var(--vms-border) !important;
+}
+
+body:not(.auth-page) .text-dark,
+body:not(.auth-page) .nav-link.text-dark,
+body:not(.auth-page) .dropdown-item,
+body:not(.auth-page) .table,
+body:not(.auth-page) .list-group-item {
+    color: var(--vms-text) !important;
+}
+
+body:not(.auth-page) .list-group-item {
+    background-color: transparent;
+    border-color: var(--vms-border);
+}
+
+body:not(.auth-page) .text-muted {
+    color: var(--vms-muted) !important;
+}
+
+body:not(.auth-page) .border,
+body:not(.auth-page) .border-top,
+body:not(.auth-page) .border-bottom,
+body:not(.auth-page) .dropdown-divider,
+body:not(.auth-page) .table > :not(caption) > * > * {
+    border-color: var(--vms-border) !important;
+}
+
+body:not(.auth-page) .dropdown-item:hover,
+body:not(.auth-page) .dropdown-item:focus,
+body:not(.auth-page) .table-hover > tbody > tr:hover > * {
+    background-color: var(--vms-surface-subtle) !important;
+    color: var(--vms-text) !important;
+}
+
+body:not(.auth-page) .form-control,
+body:not(.auth-page) .form-select {
+    background-color: var(--vms-surface);
+    color: var(--vms-text);
+    border-color: var(--vms-border);
+}
+
+body:not(.auth-page) .form-control:focus,
+body:not(.auth-page) .form-select:focus {
+    background-color: var(--vms-surface);
+    color: var(--vms-text);
+    border-color: var(--vms-accent);
+}
+
+body:not(.auth-page) .badge.bg-light.text-dark {
+    background-color: var(--vms-surface-subtle) !important;
+    color: var(--vms-text) !important;
+}
+
 
