@@ -84,6 +84,30 @@ document.addEventListener('DOMContentLoaded', event => {
 
     const getSystemScheme = () => (systemDarkMedia && systemDarkMedia.matches) ? 'dark' : 'light';
 
+    const updateChartsForTheme = (resolved) => {
+        if (typeof window.Chart === 'undefined') {
+            return;
+        }
+        const textColor = resolved === 'dark' ? '#cbd5e1' : '#334155';
+        const gridColor = resolved === 'dark' ? 'rgba(148, 163, 184, 0.18)' : 'rgba(15, 23, 42, 0.08)';
+        window.Chart.defaults.color = textColor;
+        window.Chart.defaults.borderColor = gridColor;
+
+        if (window.Chart.instances) {
+            Object.values(window.Chart.instances).forEach((chart) => {
+                if (chart && chart.options && chart.options.scales) {
+                    Object.values(chart.options.scales).forEach((scale) => {
+                        if (scale.ticks) scale.ticks.color = textColor;
+                        if (scale.grid) scale.grid.color = gridColor;
+                    });
+                }
+                if (chart && typeof chart.update === 'function') {
+                    chart.update('none');
+                }
+            });
+        }
+    };
+
     const applyColorScheme = (storedScheme) => {
         const metaValue = storedScheme ?? 'light dark';
         if (colorSchemeMeta) {
@@ -91,6 +115,17 @@ document.addEventListener('DOMContentLoaded', event => {
         }
         const resolved = storedScheme ?? getSystemScheme();
         document.documentElement.setAttribute('data-bs-theme', resolved);
+
+        if (themeToggleBtn) {
+            const label = resolved === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            themeToggleBtn.setAttribute('title', label);
+            themeToggleBtn.setAttribute('aria-pressed', resolved === 'dark' ? 'true' : 'false');
+        }
+
+        updateChartsForTheme(resolved);
+        window.dispatchEvent(new CustomEvent('vms:themechange', {
+            detail: { theme: resolved, stored: storedScheme }
+        }));
     };
 
     applyColorScheme(readStoredScheme());

@@ -2,7 +2,7 @@
 // includes/navbar.php
 ?>
 <!-- Top navigation-->
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-3 shadow-sm">
+<nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3 shadow-sm">
     <div class="container-fluid">
         <button class="btn btn-outline-secondary d-md-none" id="sidebarToggle"><i class="bi bi-list"></i></button>
         
@@ -16,7 +16,7 @@
             <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center gap-2">
                 <!-- Light / Dark Mode Toggle -->
                 <li class="nav-item">
-                    <button type="button" class="nav-link vms-theme-toggle border-0 bg-transparent d-inline-flex align-items-center justify-content-center" id="themeToggleBtn">
+                    <button type="button" class="nav-link vms-theme-toggle border-0 bg-transparent d-inline-flex align-items-center justify-content-center" id="themeToggleBtn" title="Toggle light/dark theme">
                         <span class="theme-option-dark">
                             <i class="bi bi-moon-stars fs-5" aria-hidden="true"></i>
                             <span class="visually-hidden">Switch to dark theme</span>

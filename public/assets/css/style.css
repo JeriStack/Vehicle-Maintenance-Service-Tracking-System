@@ -42,7 +42,7 @@
 
 /* Fallback for browsers without light-dark() support */
 @media (prefers-color-scheme: dark) {
-    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) {
+    :root:not([data-bs-theme="light"]):not(:has(> head > meta[name="color-scheme"][content="light"])) {
         --vms-bg: var(--vms-bg-dark);
         --vms-surface: var(--vms-surface-dark);
         --vms-surface-subtle: var(--vms-surface-subtle-dark);
@@ -55,7 +55,8 @@
     }
 }
 
-/* Reflect <meta name="color-scheme"> manual overrides back to CSS color-scheme */
+/* Reflect <meta name="color-scheme"> and [data-bs-theme] overrides back to CSS color-scheme */
+:root[data-bs-theme="dark"],
 :root:has(> head > meta[name="color-scheme"][content="dark"]) {
     color-scheme: dark;
     --vms-bg: var(--vms-bg-dark);
@@ -69,6 +70,7 @@
     --vms-scrollbar-thumb: var(--vms-scrollbar-thumb-dark);
 }
 
+:root[data-bs-theme="light"],
 :root:has(> head > meta[name="color-scheme"][content="light"]) {
     color-scheme: light;
     --vms-bg: var(--vms-bg-light);
@@ -501,106 +503,165 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
 
 /* Dark (system preference when not pinned light, or pinned dark): show sun ("Switch to light") */
 @media (prefers-color-scheme: dark) {
-    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-dark {
+    :root:not([data-bs-theme="light"]):not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-dark {
         display: none;
     }
-    :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-light {
+    :root:not([data-bs-theme="light"]):not(:has(> head > meta[name="color-scheme"][content="light"])) .vms-theme-toggle .theme-option-light {
         display: inline-flex;
         align-items: center;
     }
 }
 
+:root[data-bs-theme="dark"] .vms-theme-toggle .theme-option-dark,
 :root:has(> head > meta[name="color-scheme"][content="dark"]) .vms-theme-toggle .theme-option-dark {
     display: none;
 }
+:root[data-bs-theme="dark"] .vms-theme-toggle .theme-option-light,
 :root:has(> head > meta[name="color-scheme"][content="dark"]) .vms-theme-toggle .theme-option-light {
     display: inline-flex;
     align-items: center;
 }
 
-/* Theme-Aware Application Surfaces (Light & Dark via CSS Tokens) */
+/* Theme-Aware Application Surfaces (Scoped cleanly outside #sidebar-wrapper and .auth-page) */
 body:not(.auth-page).bg-light {
     background-color: var(--vms-bg) !important;
     color: var(--vms-text);
 }
 
-body:not(.auth-page) .navbar.bg-white,
-body:not(.auth-page) footer.bg-white,
-body:not(.auth-page) .card,
-body:not(.auth-page) .card-header.bg-white,
-body:not(.auth-page) .card-footer.bg-white,
-body:not(.auth-page) .dropdown-menu,
-body:not(.auth-page) .modal-content {
+#page-content-wrapper .navbar,
+#page-content-wrapper footer,
+#page-content-wrapper .card:not([class*="bg-"]),
+#page-content-wrapper .card-header.bg-white,
+#page-content-wrapper .card-footer.bg-white,
+#page-content-wrapper .dropdown-menu,
+.modal .modal-content,
+.toast-container .toast {
     background-color: var(--vms-surface) !important;
     color: var(--vms-text);
     border-color: var(--vms-border) !important;
 }
 
-body:not(.auth-page) .bg-white {
+#page-content-wrapper .bg-white,
+.modal .bg-white {
     background-color: var(--vms-surface) !important;
 }
 
-body:not(.auth-page) .bg-light,
-body:not(.auth-page) .table-light,
-body:not(.auth-page) .table-light > th,
-body:not(.auth-page) .table-light > td,
-body:not(.auth-page) .modal-header.bg-light,
-body:not(.auth-page) .modal-footer.bg-light,
-body:not(.auth-page) .input-group-text {
+#page-content-wrapper .bg-light,
+#page-content-wrapper .table-light,
+#page-content-wrapper .table-light > th,
+#page-content-wrapper .table-light > td,
+#page-content-wrapper .input-group-text,
+.modal .modal-header.bg-light,
+.modal .modal-footer.bg-light {
     background-color: var(--vms-surface-subtle) !important;
     color: var(--vms-text) !important;
     border-color: var(--vms-border) !important;
 }
 
-body:not(.auth-page) .text-dark,
-body:not(.auth-page) .nav-link.text-dark,
-body:not(.auth-page) .dropdown-item,
-body:not(.auth-page) .table,
-body:not(.auth-page) .list-group-item {
+#page-content-wrapper .text-dark,
+#page-content-wrapper .nav-link.text-dark,
+#page-content-wrapper .dropdown-item,
+#page-content-wrapper .table,
+#page-content-wrapper .list-group-item,
+.modal .text-dark {
     color: var(--vms-text) !important;
 }
 
-body:not(.auth-page) .list-group-item {
+/* Preserve high-contrast dark text on bright warning/info KPI cards & badges */
+#page-content-wrapper .bg-warning,
+#page-content-wrapper .bg-warning .text-dark,
+#page-content-wrapper .bg-warning.text-dark,
+#page-content-wrapper .badge.bg-warning.text-dark,
+#page-content-wrapper .badge.bg-info.text-dark {
+    color: #0f172a !important;
+}
+
+#page-content-wrapper .list-group-item {
     background-color: transparent;
     border-color: var(--vms-border);
 }
 
-body:not(.auth-page) .text-muted {
+#page-content-wrapper .text-muted,
+.modal .text-muted {
     color: var(--vms-muted) !important;
 }
 
-body:not(.auth-page) .border,
-body:not(.auth-page) .border-top,
-body:not(.auth-page) .border-bottom,
-body:not(.auth-page) .dropdown-divider,
-body:not(.auth-page) .table > :not(caption) > * > * {
+#page-content-wrapper .border,
+#page-content-wrapper .border-top,
+#page-content-wrapper .border-bottom,
+#page-content-wrapper .dropdown-divider,
+#page-content-wrapper .table > :not(caption) > * > *,
+#page-content-wrapper .nav-tabs,
+.modal .border-bottom,
+.modal .border-top {
     border-color: var(--vms-border) !important;
 }
 
-body:not(.auth-page) .dropdown-item:hover,
-body:not(.auth-page) .dropdown-item:focus,
-body:not(.auth-page) .table-hover > tbody > tr:hover > * {
+#page-content-wrapper .nav-tabs .nav-link {
+    color: var(--vms-muted);
+}
+
+#page-content-wrapper .nav-tabs .nav-link.active {
+    background-color: var(--vms-surface);
+    color: var(--vms-text) !important;
+    border-color: var(--vms-border) var(--vms-border) var(--vms-surface);
+}
+
+#page-content-wrapper .dropdown-item:hover,
+#page-content-wrapper .dropdown-item:focus,
+#page-content-wrapper .table-hover > tbody > tr:hover > * {
     background-color: var(--vms-surface-subtle) !important;
     color: var(--vms-text) !important;
 }
 
-body:not(.auth-page) .form-control,
-body:not(.auth-page) .form-select {
+#page-content-wrapper .form-control,
+#page-content-wrapper .form-select,
+.modal .form-control,
+.modal .form-select {
     background-color: var(--vms-surface);
     color: var(--vms-text);
     border-color: var(--vms-border);
 }
 
-body:not(.auth-page) .form-control:focus,
-body:not(.auth-page) .form-select:focus {
+#page-content-wrapper .form-control::placeholder,
+.modal .form-control::placeholder {
+    color: var(--vms-muted);
+}
+
+#page-content-wrapper .form-control:focus,
+#page-content-wrapper .form-select:focus,
+.modal .form-control:focus,
+.modal .form-select:focus {
     background-color: var(--vms-surface);
     color: var(--vms-text);
     border-color: var(--vms-accent);
 }
 
-body:not(.auth-page) .badge.bg-light.text-dark {
+#page-content-wrapper .badge.bg-light.text-dark {
     background-color: var(--vms-surface-subtle) !important;
     color: var(--vms-text) !important;
+}
+
+#page-content-wrapper .btn-light {
+    background-color: var(--vms-surface-subtle);
+    border-color: var(--vms-border);
+    color: var(--vms-text);
+}
+
+#page-content-wrapper .btn-light:hover {
+    background-color: var(--vms-border);
+    color: var(--vms-text);
+}
+
+#page-content-wrapper .page-link {
+    background-color: var(--vms-surface);
+    border-color: var(--vms-border);
+    color: var(--vms-text);
+}
+
+#page-content-wrapper .page-item.disabled .page-link {
+    background-color: var(--vms-surface-subtle);
+    color: var(--vms-muted);
 }
 
 
