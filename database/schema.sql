@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `vehicles` (
     CONSTRAINT `fk_vehicles_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
     UNIQUE KEY `idx_vehicles_owner_plate_norm` (`user_id`, `plate_number_normalized`),
     INDEX `idx_vehicles_user_id` (`user_id`),
+    INDEX `idx_vehicles_user_status` (`user_id`, `status`),
     INDEX `idx_vehicles_reg_expiry` (`registration_expiry`),
     INDEX `idx_vehicles_status` (`status`),
     INDEX `idx_vehicles_make_model` (`make`, `model`)
@@ -156,6 +157,7 @@ CREATE TABLE IF NOT EXISTS `notifications` (
     CONSTRAINT `fk_notif_schedule` FOREIGN KEY (`schedule_id`) REFERENCES `maintenance_schedules` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     UNIQUE KEY `idx_notif_dedupe` (`dedupe_key`),
     INDEX `idx_notif_user_read` (`user_id`, `is_read`),
+    INDEX `idx_notif_user_read_created` (`user_id`, `is_read`, `created_at`),
     INDEX `idx_notif_created_at` (`created_at`),
     INDEX `idx_notif_vehicle_id` (`vehicle_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -199,8 +201,10 @@ CREATE TABLE IF NOT EXISTS `audit_logs` (
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `fk_audit_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
     INDEX `idx_audit_user_id` (`user_id`),
+    INDEX `idx_audit_user_created` (`user_id`, `created_at`),
     INDEX `idx_audit_action` (`action`),
     INDEX `idx_audit_table` (`table_name`),
+    INDEX `idx_audit_table_record` (`table_name`, `record_id`),
     INDEX `idx_audit_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -255,10 +259,10 @@ CREATE TABLE IF NOT EXISTS `login_attempts` (
 -- 14. System Settings & Bootstrap Metadata
 CREATE TABLE IF NOT EXISTS `system_settings` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `setting_key` VARCHAR(100) NOT NULL UNIQUE,
+    `setting_key` VARCHAR(100) NOT NULL,
     `setting_value` TEXT NULL,
     `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX `idx_sys_key` (`setting_key`)
+    UNIQUE KEY `uk_system_settings_key` (`setting_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

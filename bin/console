@@ -121,6 +121,24 @@ try {
             echo "  [PHP Version]:   " . PHP_VERSION . PHP_EOL;
             break;
 
+        case 'admin:create':
+            $opts = [];
+            foreach (array_slice($args, 1) as $arg) {
+                if (str_starts_with($arg, '--') && str_contains($arg, '=')) {
+                    [$k, $v] = explode('=', substr($arg, 2), 2);
+                    $opts[$k] = $v;
+                }
+            }
+            $name = (string) ($opts['name'] ?? '');
+            $email = (string) ($opts['email'] ?? '');
+            $password = (string) ($opts['password'] ?? '');
+            $phone = isset($opts['phone']) ? (string) $opts['phone'] : null;
+
+            $pdo = \VMS\Core\Database::getConnection();
+            $created = \VMS\Security\AdminProvisioner::provision($pdo, $name, $email, $password, $phone);
+            echo "  [DONE] Initial System Administrator provisioned: {$created['full_name']} <{$created['email']}> (ID: {$created['id']})" . PHP_EOL;
+            break;
+
         case 'help':
         default:
             echo "Available commands:" . PHP_EOL;
@@ -128,6 +146,7 @@ try {
             echo "  migrate:status    Display the status of all registered migrations" . PHP_EOL;
             echo "  migrate:rollback  Rollback the most recent migration batch" . PHP_EOL;
             echo "  seed              Execute database reference data seeders" . PHP_EOL;
+            echo "  admin:create      One-time CLI administrator provisioning (--name=... --email=... --password=...)" . PHP_EOL;
             echo "  health            Perform environment and database connectivity probe" . PHP_EOL;
             echo "  help              Display this command usage overview" . PHP_EOL;
             break;

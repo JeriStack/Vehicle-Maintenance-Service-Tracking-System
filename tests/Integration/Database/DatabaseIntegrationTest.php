@@ -363,4 +363,42 @@ class DatabaseIntegrationTest extends TestCase
         $mileageCount = (int) self::$testDb->query("SELECT COUNT(*) FROM vehicle_mileage_logs WHERE vehicle_id = {$vehId}")->fetchColumn();
         $this->assertTrue($mileageCount > 0, "Vehicle archival must NOT delete mileage logs");
     }
+
+    /**
+     * 11. Test Auth Security Tables and Composite Indexes (Migrations 14 & 15)
+     */
+    public function testAuthSecuritySchemaAndCompositeIndexes(): void
+    {
+        $authVersionCol = self::$testDb->query("
+            SELECT COUNT(*) FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'auth_version'
+        ")->fetchColumn();
+        $this->assertSame(1, (int) $authVersionCol, "users.auth_version column must exist");
+
+        foreach (['login_attempts', 'system_settings'] as $table) {
+            $exists = self::$testDb->query("SHOW TABLES LIKE '{$table}'")->fetchColumn();
+            $this->assertSame($table, $exists, "Security table '{$table}' must exist");
+        }
+
+        $expectedIndexes = [
+            ['vehicles', 'idx_vehicles_user_status'],
+            ['notifications', 'idx_notif_user_read_created'],
+            ['audit_logs', 'idx_audit_table_record'],
+            ['audit_logs', 'idx_audit_user_created'],
+        ];
+
+        foreach ($expectedIndexes as [$table, $indexName]) {
+            $idxCount = (int) self::$testDb->query("
+                SELECT COUNT(*) FROM information_schema.STATISTICS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table}' AND INDEX_NAME = '{$indexName}'
+            ")->fetchColumn();
+            $this->assertTrue($idxCount > 0, "Composite index {$table}.{$indexName} must exist");
+        }
+
+        $redundantIdx = (int) self::$testDb->query("
+            SELECT COUNT(*) FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'system_settings' AND INDEX_NAME = 'idx_sys_key'
+        ")->fetchColumn();
+        $this->assertSame(0, $redundantIdx, "Redundant idx_sys_key index on system_settings must be removed");
+    }
 }
