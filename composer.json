@@ -9,13 +9,24 @@
     "require-dev": {
         "phpunit/phpunit": "^9.5 || ^10.0 || ^11.0"
     },
+    "autoload": {
+        "psr-4": {
+            "VMS\\": "app/",
+            "Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "app/Support/helpers.php"
+        ]
+    },
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
         }
     },
     "scripts": {
-        "test": "php tests/run_tests.php"
+        "test": "php tests/run_tests.php",
+        "test:smoke": "php tests/run_tests.php --smoke",
+        "test:db": "php tests/run_tests.php --database",
+        "test:all": "php tests/run_tests.php --all"
     }
 }
-

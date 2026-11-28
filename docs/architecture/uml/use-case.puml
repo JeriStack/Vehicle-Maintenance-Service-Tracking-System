@@ -1,0 +1,115 @@
+@startuml use-case
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam monochrome false
+skinparam actorStyle awesome
+
+title Vehicle Maintenance Service Tracking System (VMS) - Use Case Diagram
+
+actor "Guest" as Guest
+actor "Vehicle Owner" as Owner
+actor "System Administrator" as Admin
+actor "CLI Scheduler\n(System Daemon)" as Scheduler <<Service>>
+
+rectangle "Vehicle Maintenance Service Tracking System (VMS)" {
+
+  ' Guest Use Cases
+  package "Authentication & Onboarding" {
+    usecase "UC-01: Register Account" as UC_Register
+    usecase "UC-02: Login to Portal" as UC_Login
+    usecase "UC-03: Request Password Reset" as UC_ForgotPass
+    usecase "UC-04: Reset Password via Token" as UC_ResetPass
+    usecase "UC-05: Logout" as UC_Logout
+  }
+
+  ' Vehicle Owner Use Cases
+  package "Vehicle Garage Management" {
+    usecase "UC-10: Register Vehicle" as UC_AddVehicle
+    usecase "UC-11: View Personal Garage" as UC_ViewGarage
+    usecase "UC-12: Update Vehicle Details" as UC_EditVehicle
+    usecase "UC-13: Archive Vehicle" as UC_ArchiveVehicle
+  }
+
+  package "Service History & Maintenance" {
+    usecase "UC-20: Log Completed Service" as UC_LogService
+    usecase "UC-21: View Service History" as UC_ViewHistory
+    usecase "UC-22: Void Service Record" as UC_VoidService
+    usecase "UC-23: Schedule Maintenance" as UC_ScheduleMtn
+    usecase "UC-24: View Maintenance Status" as UC_ViewStatus
+  }
+
+  package "Notifications & Alerts" {
+    usecase "UC-30: View Notification Inbox" as UC_ViewNotif
+    usecase "UC-31: Receive Real-Time Alert" as UC_ReceiveWS
+    usecase "UC-32: Configure Notification Settings" as UC_ConfigNotif
+  }
+
+  package "Analytics & Reports" {
+    usecase "UC-40: View Cost Breakdown Charts" as UC_ViewCosts
+    usecase "UC-41: Export History as CSV" as UC_ExportCSV
+  }
+
+  ' System Administrator Use Cases
+  package "System Administration & Governance" {
+    usecase "UC-50: View Admin Dashboard" as UC_AdminDash
+    usecase "UC-51: Search & Browse User Accounts" as UC_SearchUsers
+    usecase "UC-52: Activate / Deactivate Account" as UC_ToggleUser
+    usecase "UC-53: Manage Admin Privileges" as UC_ManageRoles
+    usecase "UC-54: Manage Global Service Types" as UC_ManageCatalog
+    usecase "UC-55: Review Security Audit Logs" as UC_ViewAudit
+    usecase "UC-56: Manage System Configuration" as UC_ManageConfig
+  }
+
+  ' Background CLI Tasks
+  package "Scheduled Background Engine" {
+    usecase "UC-60: Evaluate Maintenance Schedules" as UC_EvalSchedules
+    usecase "UC-61: Check Registration Expiry" as UC_CheckReg
+    usecase "UC-62: Generate Idempotent Reminders" as UC_GenReminders
+    usecase "UC-63: Broadcast WebSocket Events" as UC_BroadcastWS
+  }
+}
+
+' Guest Links
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_ForgotPass
+Guest --> UC_ResetPass
+
+' Vehicle Owner Links
+Owner --> UC_Logout
+Owner --> UC_AddVehicle
+Owner --> UC_ViewGarage
+Owner --> UC_EditVehicle
+Owner --> UC_ArchiveVehicle
+Owner --> UC_LogService
+Owner --> UC_ViewHistory
+Owner --> UC_VoidService
+Owner --> UC_ScheduleMtn
+Owner --> UC_ViewStatus
+Owner --> UC_ViewNotif
+Owner --> UC_ReceiveWS
+Owner --> UC_ConfigNotif
+Owner --> UC_ViewCosts
+Owner --> UC_ExportCSV
+
+' Admin Links
+Admin --> UC_Logout
+Admin --> UC_AdminDash
+Admin --> UC_SearchUsers
+Admin --> UC_ToggleUser
+Admin --> UC_ManageRoles
+Admin --> UC_ManageCatalog
+Admin --> UC_ViewAudit
+Admin --> UC_ManageConfig
+
+' CLI Scheduler Links
+Scheduler --> UC_EvalSchedules
+Scheduler --> UC_CheckReg
+Scheduler --> UC_GenReminders
+Scheduler --> UC_BroadcastWS
+
+UC_LogService ..> UC_ScheduleMtn : <<creates/updates>>
+UC_GenReminders ..> UC_BroadcastWS : <<triggers>>
+
+@enduml
+

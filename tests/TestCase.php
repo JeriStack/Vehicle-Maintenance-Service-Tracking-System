@@ -3,6 +3,7 @@
 namespace Tests;
 
 class AssertionException extends \Exception {}
+class SkippedTestException extends \Exception {}
 
 if (class_exists('\PHPUnit\Framework\TestCase')) {
     abstract class BaseTestCase extends \PHPUnit\Framework\TestCase {}
@@ -10,21 +11,35 @@ if (class_exists('\PHPUnit\Framework\TestCase')) {
     abstract class BaseTestCase {
         protected $assertionCount = 0;
         protected $expectedException = null;
+        protected $expectedExceptionMessage = null;
 
         public function getAssertionCount() {
             return $this->assertionCount;
+        }
+
+        public function markTestSkipped(string $message = ''): void {
+            throw new SkippedTestException($message);
         }
 
         public function expectException($exceptionClass) {
             $this->expectedException = $exceptionClass;
         }
 
+        public function expectExceptionMessage(string $message): void {
+            $this->expectedExceptionMessage = $message;
+        }
+
         public function getExpectedException() {
             return $this->expectedException;
         }
 
+        public function getExpectedExceptionMessage(): ?string {
+            return $this->expectedExceptionMessage;
+        }
+
         public function clearExpectedException() {
             $this->expectedException = null;
+            $this->expectedExceptionMessage = null;
         }
 
         protected function setUp(): void {}
@@ -131,6 +146,54 @@ if (class_exists('\PHPUnit\Framework\TestCase')) {
             $this->assertionCount++;
             if (!preg_match($pattern, $string)) {
                 $msg = $message ?: "Failed asserting that '{$string}' matches pattern '{$pattern}'.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertEmpty($actual, $message = '') {
+            $this->assertionCount++;
+            if (!empty($actual)) {
+                $msg = $message ?: "Failed asserting that value is empty.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertNotEmpty($actual, $message = '') {
+            $this->assertionCount++;
+            if (empty($actual)) {
+                $msg = $message ?: "Failed asserting that value is not empty.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertIsArray($actual, $message = '') {
+            $this->assertionCount++;
+            if (!is_array($actual)) {
+                $msg = $message ?: "Failed asserting that value is an array.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertIsString($actual, $message = '') {
+            $this->assertionCount++;
+            if (!is_string($actual)) {
+                $msg = $message ?: "Failed asserting that value is a string.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertGreaterThan($expected, $actual, $message = '') {
+            $this->assertionCount++;
+            if (!($actual > $expected)) {
+                $msg = $message ?: "Failed asserting that {$actual} is greater than {$expected}.";
+                throw new AssertionException($msg);
+            }
+        }
+
+        public function assertLessThan($expected, $actual, $message = '') {
+            $this->assertionCount++;
+            if (!($actual < $expected)) {
+                $msg = $message ?: "Failed asserting that {$actual} is less than {$expected}.";
                 throw new AssertionException($msg);
             }
         }

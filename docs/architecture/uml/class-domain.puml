@@ -1,0 +1,186 @@
+@startuml class-domain
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam monochrome false
+
+title Vehicle Maintenance Service Tracking System (VMS) - Domain Class Model
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum VehicleStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum ServiceStatus {
+  COMPLETED
+  VOIDED
+}
+
+enum ScheduleStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+class User {
+  +int id
+  +string full_name
+  +string email
+  +string password_hash
+  +string phone
+  +UserRole role
+  +AccountStatus status
+  +datetime created_at
+  +datetime updated_at
+  +register()
+  +login()
+  +changePassword()
+}
+
+class Vehicle {
+  +int id
+  +int user_id
+  +string plate_number
+  +string normalized_plate
+  +string vehicle_type
+  +string make
+  +string model
+  +int year
+  +string color
+  +string vin_number
+  +int current_mileage
+  +date registration_date
+  +date registration_expiry
+  +VehicleStatus status
+  +datetime created_at
+  +datetime updated_at
+  +advanceOdometer(newMileage: int)
+  +archive()
+}
+
+class MaintenanceType {
+  +int id
+  +string name
+  +string slug
+  +string description
+  +int default_months
+  +int default_mileage
+  +bool is_active
+  +datetime created_at
+  +toggleActive()
+}
+
+class ServiceRecord {
+  +int id
+  +int vehicle_id
+  +int maintenance_type_id
+  +string service_type
+  +date service_date
+  +int mileage
+  +decimal cost
+  +string service_provider
+  +string parts_replaced
+  +string description
+  +string remarks
+  +ServiceStatus status
+  +string void_reason
+  +datetime created_at
+  +voidRecord(reason: string)
+}
+
+class MaintenanceSchedule {
+  +int id
+  +int vehicle_id
+  +int maintenance_type_id
+  +int source_service_id
+  +date next_service_date
+  +int next_service_mileage
+  +ScheduleStatus status
+  +datetime created_at
+  +datetime completed_at
+  +calculateStatus(currentMileage: int): string
+  +markCompleted()
+}
+
+class VehicleMileageLog {
+  +int id
+  +int vehicle_id
+  +int recorded_mileage
+  +string source
+  +datetime recorded_at
+}
+
+class Notification {
+  +int id
+  +int user_id
+  +int vehicle_id
+  +int schedule_id
+  +string type
+  +string title
+  +string message
+  +string dedupe_key
+  +bool is_read
+  +datetime created_at
+  +markRead()
+}
+
+class NotificationSetting {
+  +int id
+  +int user_id
+  +bool maintenance_reminder
+  +bool registration_reminder
+  +bool service_due_reminder
+  +bool overdue_reminder
+  +int reminder_days
+  +bool email_notifications
+  +bool push_notifications
+  +datetime updated_at
+}
+
+class VehiclePreference {
+  +int id
+  +int user_id
+  +int default_service_interval
+  +int default_mileage_interval
+  +string preferred_service_provider
+  +datetime updated_at
+}
+
+class AuditLog {
+  +int id
+  +int user_id
+  +string actor_type
+  +string action
+  +string table_name
+  +int record_id
+  +datetime created_at
+}
+
+' Relationships & Multiplicities
+User "1" *-- "0..*" Vehicle : owns >
+User "1" *-- "1" NotificationSetting : configures >
+User "1" *-- "1" VehiclePreference : specifies >
+User "1" *-- "0..*" Notification : receives >
+User "1" o-- "0..*" AuditLog : triggers >
+
+Vehicle "1" *-- "0..*" ServiceRecord : contains history >
+Vehicle "1" *-- "0..*" MaintenanceSchedule : plans future >
+Vehicle "1" *-- "0..*" VehicleMileageLog : tracks odometer >
+Vehicle "1" o-- "0..*" Notification : generates context for >
+
+MaintenanceType "1" o-- "0..*" ServiceRecord : categorizes >
+MaintenanceType "1" o-- "0..*" MaintenanceSchedule : defines template for >
+
+ServiceRecord "0..1" --> "0..1" MaintenanceSchedule : triggers next >
+
+@enduml
+

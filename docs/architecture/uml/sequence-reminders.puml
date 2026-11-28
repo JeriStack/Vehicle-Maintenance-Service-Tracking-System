@@ -1,0 +1,73 @@
+@startuml sequence-reminders
+autonumber
+skinparam shadowing false
+skinparam monochrome false
+
+title Automated Reminder Generation & Deduplication Sequence (CLI Runner)
+
+participant "CLI Scheduler\n(Cron / Task Scheduler)" as Cron
+participant "bin/process_reminders.php" as Runner
+participant "helpers/notification_helper.php" as NotifHelper
+participant "helpers/maintenance_calculator.php" as Calculator
+participant "Database (PDO)" as DB
+participant "helpers/websocket_helper.php" as WSHelper
+participant "WebSocket Server (8080)" as WS
+
+Cron -> Runner: Execute `php bin/process_reminders.php`
+Runner -> Runner: flock(process.lock, LOCK_EX | LOCK_NB)
+
+alt Lock Failed (Previous Process Still Active)
+  Runner --> Cron: Exit 0 ("Process already running")
+end
+
+Runner -> DB: Query Active Vehicles & Users (SELECT * FROM vehicles WHERE status = 'Active')
+DB --> Runner: Active Vehicles List
+
+loop For Each Vehicle & Owner
+  Runner -> DB: SELECT * FROM notification_settings WHERE user_id = ?
+  DB --> Runner: Settings Record (maintenance_reminder, registration_reminder, reminder_days)
+  
+  opt Registration Reminder Enabled
+    Runner -> Runner: Calculate Days until registration_expiry
+    alt Days <= reminder_days
+      Runner -> Runner: Compute dedupe_key = hash(user_id, vehicle_id, 'REGISTRATION', expiry_date)
+      Runner -> DB: Check unread notification with dedupe_key in last 7 days
+      DB --> Runner: Count
+      opt Count == 0
+        Runner -> DB: INSERT INTO notifications (user_id, vehicle_id, type = 'REMINDER', title, message, dedupe_key)
+        Runner -> WSHelper: notifyUser(user_id, notification_data)
+        WSHelper -> DB: INSERT INTO realtime_events (user_id, event, payload)
+        WSHelper -> WS: TCP Socket Broadcast (port 8080)
+      end
+    end
+  end
+  
+  opt Maintenance Reminder Enabled
+    Runner -> DB: SELECT * FROM maintenance_schedules WHERE vehicle_id = ? AND status = 'ACTIVE'
+    DB --> Runner: Open Schedules List
+    
+    loop For Each Schedule
+      Runner -> Calculator: calculateStatus(target_date, target_km, current_km, reminder_days)
+      Calculator --> Runner: Calculation Result (OVERDUE / DUE / UPCOMING / NOT_DUE)
+      
+      alt Status in ['OVERDUE', 'DUE', 'UPCOMING']
+        Runner -> Runner: Compute dedupe_key = hash(user_id, vehicle_id, schedule_id, target_date)
+        Runner -> DB: Check unread notification with dedupe_key in last 7 days
+        DB --> Runner: Count
+        opt Count == 0
+          Runner -> DB: INSERT INTO notifications (user_id, vehicle_id, type = Status, title, message, dedupe_key)
+          Runner -> WSHelper: notifyUser(user_id, alert_data)
+          WSHelper -> DB: INSERT INTO realtime_events (user_id, event, payload)
+          WSHelper -> WS: TCP Socket Broadcast (port 8080)
+        end
+      end
+    end
+  end
+end
+
+Runner -> DB: INSERT INTO audit_logs (actor = 'SYSTEM_DAEMON', action = 'Processed daily reminders')
+Runner -> Runner: flock(process.lock, LOCK_UN)
+Runner --> Cron: Exit 0 (Success Summary)
+
+@enduml
+

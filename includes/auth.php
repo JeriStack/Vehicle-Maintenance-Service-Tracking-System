@@ -2,10 +2,54 @@
 // includes/auth.php
 require_once __DIR__ . '/../config/app.php';
 
+use VMS\Core\Session;
+use VMS\Core\Database;
+
 function isLoggedIn() {
+    Session::start();
+
     if (isset($_SESSION['user_id'])) {
+        $userId = (int) $_SESSION['user_id'];
+
+        // 1. Check Idle Timeout (30 minutes default)
+        if (!Session::checkIdleTimeout(1800)) {
+            Session::destroy();
+            return false;
+        }
+
+        // 2. Validate active account status and auth_version against database (skipped in offline unit tests)
+        if (!defined('VMS_UNIT_TESTING') || !VMS_UNIT_TESTING) {
+            try {
+                if (class_exists(Database::class) && Database::testConnection()) {
+                    $pdo = Database::getConnection();
+                    $stmt = $pdo->prepare("SELECT id, role, status, auth_version FROM users WHERE id = ?");
+                    $stmt->execute([$userId]);
+                    $user = $stmt->fetch();
+
+                    if (!$user || ($user['status'] ?? '') !== 'active') {
+                        Session::destroy();
+                        return false;
+                    }
+
+                    $sessionAuthVersion = (int) ($_SESSION['auth_version'] ?? 1);
+                    $dbAuthVersion = (int) ($user['auth_version'] ?? 1);
+
+                    if ($sessionAuthVersion !== $dbAuthVersion) {
+                        Session::destroy();
+                        return false;
+                    }
+
+                    $_SESSION['role'] = $user['role'];
+                }
+            } catch (\Throwable $e) {
+                // Safe non-blocking fallback for offline environments
+            }
+        }
+
+        Session::recordActivity();
         return true;
     }
+
     return checkRememberMe();
 }
 
@@ -31,9 +75,13 @@ function checkRememberMe() {
     list($selector, $validator) = $parts;
 
     try {
-        $pdo = Database::getInstance();
+        if (!class_exists(Database::class) || !Database::testConnection()) {
+            return false;
+        }
+
+        $pdo = Database::getConnection();
         $stmt = $pdo->prepare("
-            SELECT rt.*, u.full_name, u.role, u.status 
+            SELECT rt.*, u.full_name, u.role, u.status, u.auth_version 
             FROM remember_tokens rt 
             JOIN users u ON rt.user_id = u.id 
             WHERE rt.selector = ? AND rt.expires_at > NOW() 
@@ -51,9 +99,12 @@ function checkRememberMe() {
             if (session_status() === PHP_SESSION_ACTIVE) {
                 session_regenerate_id(true);
             }
-            $_SESSION['user_id'] = $token['user_id'];
+            $_SESSION['user_id'] = (int) $token['user_id'];
             $_SESSION['user_name'] = $token['full_name'];
             $_SESSION['role'] = $token['role'];
+            $_SESSION['auth_version'] = (int) ($token['auth_version'] ?? 1);
+            $_SESSION['authenticated_at'] = time();
+            $_SESSION['last_activity'] = time();
 
             // Rotate validator for replay attack mitigation
             $newValidator = bin2hex(random_bytes(32));

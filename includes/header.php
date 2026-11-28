@@ -28,6 +28,20 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <script>
+        (function () {
+            var stored = null;
+            try { stored = localStorage.getItem('color-scheme'); } catch (e) {}
+            var content = (stored === 'light' || stored === 'dark') ? stored : 'light dark';
+            var meta = document.querySelector('meta[name="color-scheme"]');
+            if (meta) meta.content = content;
+            var resolved = (content === 'light dark')
+                ? (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : content;
+            document.documentElement.setAttribute('data-bs-theme', resolved);
+        })();
+    </script>
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' . APP_NAME : APP_NAME; ?></title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +50,7 @@ if (isset($_SESSION['user_id'])) {
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="<?php echo BASE_URL; ?>assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
     <link href="<?php echo BASE_URL; ?>assets/css/dashboard.css" rel="stylesheet">
     <link href="<?php echo BASE_URL; ?>assets/css/responsive.css" rel="stylesheet">
     

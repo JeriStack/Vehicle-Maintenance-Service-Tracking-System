@@ -5,6 +5,18 @@ require_once __DIR__ . '/../includes/auth.php';
 
 requireLogin();
 
+/**
+ * Neutralize spreadsheet formula injection (=, +, -, @, tab, CR) on string cells.
+ */
+function sanitizeCsvCell(mixed $value): string
+{
+    $str = (string) ($value ?? '');
+    if ($str !== '' && in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+        return "'" . $str;
+    }
+    return $str;
+}
+
 $userId = $_SESSION['user_id'];
 $type = $_GET['type'] ?? '';
 
@@ -35,7 +47,7 @@ try {
         
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             fputcsv($output, [
-                $row['make'], $row['model'], $row['plate_number'], 
+                sanitizeCsvCell($row['make']), sanitizeCsvCell($row['model']), sanitizeCsvCell($row['plate_number']),
                 $row['total_services'], $row['completed'], $row['total_cost'] ?: '0.00',
                 $row['upcoming'], $row['overdue']
             ]);
@@ -72,15 +84,15 @@ try {
         
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             fputcsv($output, [
-                $row['service_date'], 
-                $row['make'] . ' ' . $row['model'], 
-                $row['plate_number'],
-                $row['service_type'], 
-                $row['mileage'], 
-                $row['cost'], 
-                $row['service_provider'], 
-                $row['description'], 
-                $row['status']
+                sanitizeCsvCell($row['service_date']),
+                sanitizeCsvCell($row['make'] . ' ' . $row['model']),
+                sanitizeCsvCell($row['plate_number']),
+                sanitizeCsvCell($row['service_type']),
+                $row['mileage'],
+                $row['cost'],
+                sanitizeCsvCell($row['service_provider']),
+                sanitizeCsvCell($row['description']),
+                sanitizeCsvCell($row['status'])
             ]);
         }
         fclose($output);

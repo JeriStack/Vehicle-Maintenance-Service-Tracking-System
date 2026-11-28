@@ -21,7 +21,7 @@ if (empty($_SESSION['csrf_token'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="<?php echo BASE_URL; ?>assets/css/style.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" rel="stylesheet">
 </head>
 <body class="auth-page">
     <div class="auth-card register-card">
@@ -64,7 +64,10 @@ if (empty($_SESSION['csrf_token'])) {
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" class="form-control" id="password" name="password" required minlength="8">
+                    <input type="password" class="form-control has-password-toggle" id="password" name="password" required minlength="8">
+                    <button type="button" class="password-toggle-btn" data-password-toggle data-target="#password" aria-label="Show password" aria-pressed="false">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
                 </div>
                 <div class="form-text mt-1 text-muted small">Password must be at least 8 characters long.</div>
             </div>
@@ -73,7 +76,10 @@ if (empty($_SESSION['csrf_token'])) {
                 <label for="password_confirm" class="form-label">Confirm Password</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" required minlength="8">
+                    <input type="password" class="form-control has-password-toggle" id="password_confirm" name="password_confirm" required minlength="8">
+                    <button type="button" class="password-toggle-btn" data-password-toggle data-target="#password_confirm" aria-label="Show password" aria-pressed="false">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
             
@@ -88,5 +94,6 @@ if (empty($_SESSION['csrf_token'])) {
     </div>
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo BASE_URL; ?>assets/js/password-toggle.js"></script>
 </body>
 </html>

@@ -1,0 +1,61 @@
+@startuml activity-notifications
+skinparam shadowing false
+skinparam monochrome false
+
+title Automated Reminder & Notification Processing Activity (CLI Daemon)
+
+start
+
+:CLI Scheduler triggers bin/process_reminders.php;
+
+:Acquire Concurrency File Lock (flock);
+if (Lock Acquired?) then (no)
+  :Log "Process already running. Aborting.";
+  stop
+else (yes)
+  :Initialize Database Connection;
+endif
+
+:Query All Active Vehicles & Associated Users;
+
+repeat :For each Vehicle;
+  :Fetch Owner's notification_settings;
+  
+  ' Registration Check
+  if (Registration Reminder Enabled?) then (yes)
+    :Calculate Days until Registration Expiry;
+    if (Expiry <= Reminder Lead Days?) then (yes)
+      :Generate Registration Dedupe Key;
+      if (Unread Notification Exists within 7 Days?) then (no)
+        :Insert Registration Notification;
+        :Queue Event in realtime_events;
+      endif
+    endif
+  endif
+  
+  ' Maintenance Schedules Check
+  if (Maintenance Reminder Enabled?) then (yes)
+    :Retrieve Open Maintenance Schedules;
+    repeat :For each Schedule;
+      :Execute MaintenanceCalculator::calculateStatus();
+      if (Status is 'DUE' OR 'OVERDUE' OR 'UPCOMING') then (yes)
+        :Generate Schedule Dedupe Key;
+        if (Unread Notification Exists within 7 Days?) then (no)
+          :Insert Maintenance Notification;
+          :Queue Event in realtime_events;
+          if (WebSocket Server Available?) then (yes)
+            :Broadcast Instant Push Packet;
+          endif
+        endif
+      endif
+    repeat while (More Schedules?)
+  endif
+
+repeat while (More Vehicles?)
+
+:Release File Lock (flock);
+:Log Execution Statistics & Completion Timestamp;
+
+stop
+@enduml
+
