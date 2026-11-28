@@ -31,7 +31,9 @@ if ($action === 'check_unread') {
             'time'         => date('Y-m-d H:i:s')
         ]);
     } catch (\Throwable $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        error_log("Notification Poll Error: " . $e->getMessage(), 3, __DIR__ . '/../logs/app.log');
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Failed to load notifications.']);
     }
     exit;
 }
@@ -41,17 +43,19 @@ if ($action === 'mark_read_ajax') {
     header('Content-Type: application/json');
     try {
         if ($id === 'all' || empty($id)) {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0");
             $stmt->execute([$userId]);
             WebSocketHelper::notificationRead($userId, 'all');
         } else {
-            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE id = ? AND user_id = ?");
+            $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ?");
             $stmt->execute([(int)$id, $userId]);
             WebSocketHelper::notificationRead($userId, (int)$id);
         }
         echo json_encode(['status' => 'ok']);
     } catch (\Throwable $e) {
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        error_log("Notification Read Error: " . $e->getMessage(), 3, __DIR__ . '/../logs/app.log');
+        http_response_code(500);
+        echo json_encode(['status' => 'error', 'message' => 'Failed to update notification status.']);
     }
     exit;
 }

@@ -6,6 +6,10 @@ declare(strict_types=1);
  * PHPUnit and Standalone Test Runner Bootstrap file
  */
 
+if (!defined('VMS_UNIT_TESTING')) {
+    define('VMS_UNIT_TESTING', true);
+}
+
 require_once __DIR__ . '/TestCase.php';
 
 // 1. Load Composer autoloader or fallback PSR-4 autoloader

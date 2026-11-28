@@ -17,31 +17,33 @@ function isLoggedIn() {
             return false;
         }
 
-        // 2. Validate active account status and auth_version against database if DB is reachable
-        try {
-            if (class_exists(Database::class) && Database::testConnection()) {
-                $pdo = Database::getConnection();
-                $stmt = $pdo->prepare("SELECT id, role, status, auth_version FROM users WHERE id = ?");
-                $stmt->execute([$userId]);
-                $user = $stmt->fetch();
+        // 2. Validate active account status and auth_version against database (skipped in offline unit tests)
+        if (!defined('VMS_UNIT_TESTING') || !VMS_UNIT_TESTING) {
+            try {
+                if (class_exists(Database::class) && Database::testConnection()) {
+                    $pdo = Database::getConnection();
+                    $stmt = $pdo->prepare("SELECT id, role, status, auth_version FROM users WHERE id = ?");
+                    $stmt->execute([$userId]);
+                    $user = $stmt->fetch();
 
-                if (!$user || ($user['status'] ?? '') !== 'active') {
-                    Session::destroy();
-                    return false;
+                    if (!$user || ($user['status'] ?? '') !== 'active') {
+                        Session::destroy();
+                        return false;
+                    }
+
+                    $sessionAuthVersion = (int) ($_SESSION['auth_version'] ?? 1);
+                    $dbAuthVersion = (int) ($user['auth_version'] ?? 1);
+
+                    if ($sessionAuthVersion !== $dbAuthVersion) {
+                        Session::destroy();
+                        return false;
+                    }
+
+                    $_SESSION['role'] = $user['role'];
                 }
-
-                $sessionAuthVersion = (int) ($_SESSION['auth_version'] ?? 1);
-                $dbAuthVersion = (int) ($user['auth_version'] ?? 1);
-
-                if ($sessionAuthVersion !== $dbAuthVersion) {
-                    Session::destroy();
-                    return false;
-                }
-
-                $_SESSION['role'] = $user['role'];
+            } catch (\Throwable $e) {
+                // Safe non-blocking fallback for offline environments
             }
-        } catch (\Throwable $e) {
-            // Safe non-blocking fallback for offline unit tests
         }
 
         Session::recordActivity();

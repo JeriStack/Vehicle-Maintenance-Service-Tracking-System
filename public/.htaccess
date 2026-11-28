@@ -7,15 +7,25 @@ Options -Indexes -MultiViews
 # Follow symbolic links
 Options +FollowSymLinks
 
-# Deny access to hidden files and backup extensions
+# Deny access to hidden files and sensitive extensions
 <FilesMatch "^\.">
-    Order allow,deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 <FilesMatch "\.(bak|config|sql|fla|psd|ini|log|sh|inc|swp|dist|env)$">
-    Order allow,deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # Security Headers

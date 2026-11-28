@@ -240,4 +240,65 @@ class SmokeTest extends BaseTestCase
         $files = glob($migrationsDir . '/*.sql');
         $this->assertTrue(is_array($files) && count($files) > 0, "Migration directory should contain .sql files");
     }
+
+    /**
+     * 13. Test Directory Structure, Access Controls, and Asset Parity
+     */
+    public function testDirectoryStructureAndAccessControls(): void
+    {
+        $requiredDirs = [
+            'public',
+            'app/Core',
+            'app/Controllers',
+            'app/Middleware',
+            'app/Security',
+            'bin',
+            'config',
+            'database/migrations',
+            'database/seeders',
+            'logs',
+            'storage/logs',
+            'storage/sessions',
+            'storage/cache',
+            'storage/uploads',
+            'storage/backups',
+            'uploads/vehicle_documents',
+        ];
+
+        foreach ($requiredDirs as $dir) {
+            $this->assertTrue(is_dir($this->basePath . '/' . $dir), "Required directory '{$dir}' must exist");
+        }
+
+        $protectedDirs = [
+            'app',
+            'bin',
+            'config',
+            'database',
+            'docs',
+            'helpers',
+            'includes',
+            'logs',
+            'storage',
+            'tests',
+            'uploads',
+            'websocket',
+        ];
+
+        foreach ($protectedDirs as $dir) {
+            $htaccess = $this->basePath . '/' . $dir . '/.htaccess';
+            $this->assertTrue(file_exists($htaccess), "Protected directory '{$dir}' must contain .htaccess");
+        }
+
+        $assetsToSync = [
+            'css/style.css',
+            'js/password-toggle.js',
+        ];
+
+        foreach ($assetsToSync as $asset) {
+            $rootFile = $this->basePath . '/assets/' . $asset;
+            $publicFile = $this->basePath . '/public/assets/' . $asset;
+            $this->assertTrue(file_exists($publicFile), "Public asset '{$asset}' must exist");
+            $this->assertSame(md5_file($rootFile), md5_file($publicFile), "Asset '{$asset}' must stay synced between assets/ and public/assets/");
+        }
+    }
 }
